@@ -84,11 +84,11 @@ func (c *FabricClient) GetWorkspace(groupId string) (*workspace.WorkspaceModel, 
 
 // GetGroups retrieves a list of groups.
 // https://learn.microsoft.com/en-us/rest/api/power-bi/groups/get-groups
-func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*workspace.WorkspaceModel, error) {
+func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*workspace.WorkspacesModel, error) {
 	// GET https://api.powerbi.com/v1.0/myorg/groups
 
 	var err error
-	groups := &workspace.WorkspaceModel{}
+	groups := &workspace.WorkspacesModel{}
 
 	client, err := c.prepRequest()
 	if err != nil {
