@@ -18,7 +18,7 @@ provider "fabric" {
 }
 
 data "fabric_workspace" "example" {
-  name = "Fabric Tryout"
+  id = "c45f1037-a6ed-4316-9fe9-49b2ea54bc87"
 }
 
 output "workspace_id" {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"terraform-provider-fabric/internal/fabricapi"
-	fabricModels "terraform-provider-fabric/internal/fabricapi/models/workspace"
+	"terraform-provider-fabric/internal/fabricapi/fabricapimodels"
 	"terraform-provider-fabric/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -133,7 +133,7 @@ func (d *WorkspaceDataSource) Configure(ctx context.Context, req datasource.Conf
 // Returns: None.
 func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data models.WorkspaceModel
-	var workspace *fabricModels.WorkspaceModel
+	var workspace *fabricapimodels.WorkspaceReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -176,9 +176,9 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 	}
 
 	data.Id = types.StringValue(workspace.Id)
-	data.Name = types.StringValue(workspace.Name)
+	data.Name = types.StringValue(workspace.DisplayName)
 	data.IsReadOnly = types.BoolValue(workspace.IsReadOnly)
-	data.IsOnDedicatedCapacity = types.BoolValue(workspace.IsOnDedicatedCapacity)
+	// data.IsOnDedicatedCapacity = types.BoolValue(workspace.IsOnDedicatedCapacity)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

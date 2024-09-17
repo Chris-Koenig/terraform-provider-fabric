@@ -3,26 +3,26 @@ package fabricapi
 import (
 	"fmt"
 	"strconv"
-	"terraform-provider-fabric/internal/fabricapi/models/workspace"
+	"terraform-provider-fabric/internal/fabricapi/fabricapimodels"
 )
 
 // CreateGroup creates a new group.
 // https://learn.microsoft.com/en-us/rest/api/power-bi/groups/create-group
-func (c *FabricClient) CreateWorkspace(groupName string) (*workspace.WorkspaceModel, error) {
-	// POST https://api.fabric.com/v1.0/myorg/groups
+func (c *FabricClient) CreateWorkspace(displayName string) (*fabricapimodels.WorkspaceReadModel, error) {
 
 	var err error
-	group := &workspace.WorkspaceModel{}
+	ws := &fabricapimodels.WorkspaceReadModel{}
+	ws1 := &fabricapimodels.WorkspaceCreateModel{DisplayName: displayName}
 
 	client, err := c.prepRequest()
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare the request for CreateGroup: %v", err)
 	}
 
-	resp, err := client.SetResult(group).
+	resp, err := client.SetResult(ws).
 		SetQueryParam("workspaceV2", "True").
-		SetBody(&workspace.WorkspaceCreateModel{Name: groupName}).
-		Post("/v1.0/myorg/groups")
+		SetBody(ws1).
+		Post("/v1.0/workspace")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create group: %v", err)
 	}
@@ -31,7 +31,7 @@ func (c *FabricClient) CreateWorkspace(groupName string) (*workspace.WorkspaceMo
 		return nil, fmt.Errorf("failed to create group: %v", resp.Error())
 	}
 
-	return group, nil
+	return ws, nil
 }
 
 // DeleteGroup deletes a group by its ID.
@@ -58,36 +58,40 @@ func (c *FabricClient) DeleteWorkspace(workspaceId string) error {
 }
 
 // GetGroup retrieves a group by its ID.
-func (c *FabricClient) GetWorkspace(groupId string) (*workspace.WorkspaceModel, error) {
+func (c *FabricClient) GetWorkspace(workspaceId string) (*fabricapimodels.WorkspaceReadModel, error) {
 	// GET https://api.fabric.microsoft.com/v1/workspaces/{workspaceid}
 
 	var err error
-	group := &workspace.WorkspaceModel{}
+	workspace := &fabricapimodels.WorkspaceReadModel{}
 
 	client, err := c.prepRequest()
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare the request for GetGroups: %v", err)
 	}
 
-	resp, err := client.SetResult(group).Get(fmt.Sprintf("/v1/workspaces/%s", groupId))
+	baseURL := "https://api.fabric.microsoft.com"
+	url := fmt.Sprintf("%s/v1/workspaces/%s", baseURL, workspaceId)
+	resp, err := client.SetResult(workspace).Get(url)
+
+	//resp, err := client.SetResult(workspace).Get(fmt.Sprintf("/v1/workspaces/%s", workspaceId))
 	if err != nil {
-		return nil, fmt.Errorf("failed to get group: %v", err)
+		return nil, fmt.Errorf("failed to get workspace: %v", err)
 	}
 
 	if resp.IsError() {
-		return nil, fmt.Errorf("failed to get group: %v", resp.Error())
+		return nil, fmt.Errorf("failed to get workspace: %v", resp.Error())
 	}
 
-	return group, nil
+	return workspace, nil
 }
 
 // GetGroups retrieves a list of groups.
 // https://learn.microsoft.com/en-us/rest/api/power-bi/groups/get-groups
-func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*workspace.WorkspacesModel, error) {
+func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*fabricapimodels.WorkspacesReadModel, error) {
 	// GET https://api.powerbi.com/v1.0/myorg/groups
 
 	var err error
-	groups := &workspace.WorkspacesModel{}
+	groups := &fabricapimodels.WorkspacesReadModel{}
 
 	client, err := c.prepRequest()
 	if err != nil {
