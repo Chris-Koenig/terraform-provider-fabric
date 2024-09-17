@@ -56,10 +56,10 @@ func (d *WorkspaceDataSource) Schema(_ context.Context, req datasource.SchemaReq
 				MarkdownDescription: "Indicates whether the workspace is read-only",
 				Computed:            true,
 			},
-			"is_on_dedicated_capacity": schema.BoolAttribute{
-				MarkdownDescription: "Indicates whether the workspace is on dedicated capacity",
-				Computed:            true,
-			},
+			// "is_on_dedicated_capacity": schema.BoolAttribute{
+			// 	MarkdownDescription: "Indicates whether the workspace is on dedicated capacity",
+			// 	Computed:            true,
+			// },
 		},
 	}
 }

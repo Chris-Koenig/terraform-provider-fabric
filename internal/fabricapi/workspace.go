@@ -18,11 +18,12 @@ func (c *FabricClient) CreateWorkspace(displayName string) (*fabricapimodels.Wor
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare the request for CreateGroup: %v", err)
 	}
-
+	baseURL := "https://api.fabric.microsoft.com"
+	url := fmt.Sprintf("%s/v1/workspaces", baseURL)
 	resp, err := client.SetResult(ws).
-		SetQueryParam("workspaceV2", "True").
+		// SetQueryParam("workspaceV2", "True").
 		SetBody(ws1).
-		Post("/v1.0/workspace")
+		Post(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create group: %v", err)
 	}
