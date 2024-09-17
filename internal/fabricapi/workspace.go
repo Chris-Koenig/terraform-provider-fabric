@@ -58,9 +58,8 @@ func (c *FabricClient) DeleteWorkspace(workspaceId string) error {
 }
 
 // GetGroup retrieves a group by its ID.
-// https://learn.microsoft.com/en-us/rest/api/power-bi/groups/get-group
 func (c *FabricClient) GetWorkspace(groupId string) (*workspace.WorkspaceModel, error) {
-	// GET https://api.powerbi.com/v1.0/myorg/groups/{groupId}
+	// GET https://api.fabric.microsoft.com/v1/workspaces/{workspaceid}
 
 	var err error
 	group := &workspace.WorkspaceModel{}
@@ -70,7 +69,7 @@ func (c *FabricClient) GetWorkspace(groupId string) (*workspace.WorkspaceModel, 
 		return nil, fmt.Errorf("failed to prepare the request for GetGroups: %v", err)
 	}
 
-	resp, err := client.SetResult(group).Get(fmt.Sprintf("/v1.0/myorg/groups/%s", groupId))
+	resp, err := client.SetResult(group).Get(fmt.Sprintf("/v1/workspaces/%s", groupId))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get group: %v", err)
 	}

@@ -104,7 +104,7 @@ func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resour
 
 func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		// NewExampleDataSource,
+		NewWorkspaceDataSource,
 	}
 }
 
