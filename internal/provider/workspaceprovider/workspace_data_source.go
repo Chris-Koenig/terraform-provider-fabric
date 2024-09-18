@@ -55,10 +55,6 @@ func (d *WorkspaceDataSource) Schema(_ context.Context, req datasource.SchemaReq
 				MarkdownDescription: "the description of the workspace.",
 				Computed:            true,
 			},
-			"capacity_id": schema.StringAttribute{
-				MarkdownDescription: "the id of the capacity to which the workspace belongs.",
-				Computed:            true,
-			},
 		},
 	}
 }
@@ -179,8 +175,7 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 	// Mapping the Values from the REST API to the provider model
 	data.Id = types.StringValue(workspace.Id)
 	data.Name = types.StringValue(workspace.DisplayName)
-	data.CapacityId = types.StringValue("")
-	data.Description = types.StringValue("")
+	data.Description = types.StringValue(workspace.Description)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

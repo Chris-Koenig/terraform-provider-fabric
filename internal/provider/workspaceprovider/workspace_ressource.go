@@ -65,7 +65,6 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 	var workspaceToCreate = fabricapi.WorkspaceCreateModel{
 		Description: config.Description.ValueString(),
 		DisplayName: config.Name.ValueString(),
-		CapacityId:  config.CapacityId.ValueString(),
 	}
 
 	workspaceCreated, err = r.client.CreateWorkspace(workspaceToCreate)
@@ -79,7 +78,6 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 	tflog.Debug(ctx, "Populate the response with the workspace data")
 	state.Id = types.StringValue(workspaceCreated.Id)
 	state.Name = types.StringValue(workspaceCreated.DisplayName)
-	state.CapacityId = types.StringValue(workspaceCreated.CapacityId)
 	state.Description = types.StringValue(workspaceCreated.Description)
 
 	diags := resp.State.Set(ctx, &state)
@@ -145,8 +143,7 @@ func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	state.Id = types.StringValue(workspace.Id)
 	state.Name = types.StringValue(workspace.DisplayName)
-
-	//state.IsOnDedicatedCapacity = types.BoolValue(workspace.IsOnDedicatedCapacity)
+	state.Description = types.StringValue(workspace.Description)
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -179,12 +176,6 @@ func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest
 				Required:            false,
 				Computed:            false,
 			},
-			"capacity_id": schema.StringAttribute{
-				MarkdownDescription: "the id of the capacity to which the workspace belongs.",
-				Optional:            true,
-				Required:            false,
-				Computed:            false,
-			},
 		},
 	}
 }
@@ -208,12 +199,11 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 	updateRequest = fabricapi.WorkspaceUpdateModel{
 		DisplayName: plan.Name.ValueString(),
 		Description: plan.Description.ValueString(),
-		Id:          plan.Id.ValueString(),
-		// CapacityId:  plan.CapacityId.ValueString(),
+		// Id:          plan.Id.ValueString(),
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Updating workspace with name: %s", state.Name.ValueString()))
-	err = r.client.UpdateWorkspace(updateRequest)
+	err = r.client.UpdateWorkspace(plan.Id.ValueString(), updateRequest)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot update workspace with Id %s", state.Id.ValueString()), err.Error())
 		return
@@ -222,6 +212,7 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 	tflog.Debug(ctx, "Workspace updated successfully")
 	tflog.Debug(ctx, "Populate the response with the workspace data")
 	tflog.Debug(ctx, fmt.Sprintf("Reading workspace with name: %s", plan.Name.ValueString()))
+
 	workspaceUpdated, err = r.client.GetWorkspace(state.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
@@ -231,7 +222,6 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 	state.Id = types.StringValue(workspaceUpdated.Id)
 	state.Name = types.StringValue(workspaceUpdated.DisplayName)
 	state.Description = types.StringValue(workspaceUpdated.Description)
-	state.CapacityId = types.StringValue(workspaceUpdated.CapacityId)
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

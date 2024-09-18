@@ -110,7 +110,7 @@ func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*Workspa
 	return groups, nil
 }
 
-func (c *FabricClient) UpdateWorkspace(workspaceToUpdate WorkspaceUpdateModel) error {
+func (c *FabricClient) UpdateWorkspace(workspaceIdToUpdate string, workspaceToUpdate WorkspaceUpdateModel) error {
 
 	var err error
 
@@ -123,13 +123,14 @@ func (c *FabricClient) UpdateWorkspace(workspaceToUpdate WorkspaceUpdateModel) e
 
 	resp, err := client.
 		SetBody(body).
-		Patch(fmt.Sprintf("/v1/workspaces/%s", body.Id))
+		Patch(fmt.Sprintf("/v1/workspaces/%s", workspaceIdToUpdate))
+
 	if err != nil {
-		return fmt.Errorf("failed to update groups: %v", err)
+		return fmt.Errorf("failed to update group: %v", err)
 	}
 
 	if resp.IsError() {
-		return fmt.Errorf("failed to get groups: [%v] %s", resp.StatusCode(), resp.String())
+		return fmt.Errorf("failed to get group: [%v] %s", resp.StatusCode(), resp.String())
 	}
 
 	return nil
