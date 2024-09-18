@@ -9,5 +9,5 @@ type WorkspaceProviderModel struct {
 	Id          types.String `tfsdk:"id"`
 	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
-	CapacityId  types.String `tfsdk:"capacityId"`
+	CapacityId  types.String `tfsdk:"capacity_id"`
 }

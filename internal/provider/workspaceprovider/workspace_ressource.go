@@ -150,20 +150,32 @@ func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 // Schema sets the schema for the WorkspaceResource.
 func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Fabric workspace resource",
+		MarkdownDescription: "Fabric workspace data source",
+
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				MarkdownDescription: "The name of the workspace",
+				Optional:            false,
 				Required:            true,
+				Computed:            false,
 			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The id of the workspace",
 				Computed:            true,
 			},
-			"is_read_only": schema.BoolAttribute{
-				MarkdownDescription: "Indicates whether the workspace is read-only",
-				Computed:            true,
+			"description": schema.StringAttribute{
+				MarkdownDescription: "the description of the workspace.",
+				Optional:            true,
+				Required:            false,
+				Computed:            false,
+			},
+			"capacity_id": schema.StringAttribute{
+				MarkdownDescription: "the id of the capacity to which the workspace belongs.",
+				Optional:            true,
+				Required:            false,
+				Computed:            false,
 			},
 		},
 	}
