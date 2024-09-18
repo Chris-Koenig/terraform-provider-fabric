@@ -2,7 +2,6 @@ package fabricapi
 
 import (
 	"fmt"
-	"strconv"
 )
 
 func (c FabricClient) CreateWorkspace(workspaceToCreate WorkspaceCreateModel) (*WorkspaceReadModel, error) {
@@ -16,7 +15,6 @@ func (c FabricClient) CreateWorkspace(workspaceToCreate WorkspaceCreateModel) (*
 	}
 
 	url := "/v1/workspaces"
-
 	resp, err := client.SetResult(ws).
 		SetBody(workspaceToCreate).
 		Post(url)
@@ -63,7 +61,6 @@ func (c *FabricClient) GetWorkspace(workspaceId string) (*WorkspaceReadModel, er
 		return nil, fmt.Errorf("failed to prepare the request for GetGroups: %v", err)
 	}
 
-	// baseURL := "https://api.fabric.microsoft.com"
 	url := fmt.Sprintf("/v1/workspaces/%s", workspaceId)
 	resp, err := client.SetResult(workspace).Get(url)
 
@@ -76,38 +73,6 @@ func (c *FabricClient) GetWorkspace(workspaceId string) (*WorkspaceReadModel, er
 	}
 
 	return workspace, nil
-}
-
-func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*WorkspacesReadModel, error) {
-
-	var err error
-	groups := &WorkspacesReadModel{}
-	// baseURL := "https://api.fabric.microsoft.com"
-	client, err := c.prepRequest()
-	if err != nil {
-		return nil, fmt.Errorf("failed to prepare the request for GetGroups: %v", err)
-	}
-
-	if filter != "" {
-		client.SetQueryParam("$filter", filter)
-	}
-	if top > 0 {
-		client.SetQueryParam("$top", strconv.Itoa(top))
-	}
-	if skip > 0 {
-		client.SetQueryParam("$skip", strconv.Itoa(skip))
-	}
-
-	resp, err := client.SetResult(&groups).Get("/v1/workspaces")
-	if err != nil {
-		return nil, fmt.Errorf("failed to get groups: %v", err)
-	}
-
-	if resp.IsError() {
-		return nil, fmt.Errorf("failed to get groups: %v", resp.Error())
-	}
-
-	return groups, nil
 }
 
 func (c *FabricClient) UpdateWorkspace(workspaceIdToUpdate string, workspaceToUpdate WorkspaceUpdateModel) error {

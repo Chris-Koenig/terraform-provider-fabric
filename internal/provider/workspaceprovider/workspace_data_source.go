@@ -43,7 +43,7 @@ func (d *WorkspaceDataSource) Schema(_ context.Context, req datasource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				MarkdownDescription: "The name of the workspace",
-				Optional:            true,
+				Computed:            true,
 			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The id of the workspace",
@@ -143,26 +143,6 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", data.Id), err.Error())
 			return
 		}
-	}
-
-	if !data.Name.IsNull() {
-		workspaces, err := d.client.GetWorkspaces(fmt.Sprintf("name eq '%s'", data.Name), 0, 0)
-		if err != nil {
-			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with name %s", data.Name), err.Error())
-			return
-		}
-
-		if len(workspaces.Value) == 0 {
-			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with name %s", data.Name), "No groups found")
-			return
-		}
-
-		if len(workspaces.Value) > 1 {
-			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with name %s", data.Name), "Multiple groups found")
-			return
-		}
-
-		workspace = &workspaces.Value[0]
 	}
 
 	if workspace == nil {
