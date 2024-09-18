@@ -8,12 +8,12 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-// BaseURL - Default Power BI URL.
-const BaseURL string = "https://api.fabric.microsoft.com"
+// Default Fabric BI URL.
+const constBaseURL string = "https://api.fabric.microsoft.com"
 
 // Client - Power BI API client.
 type FabricClient struct {
-	BaseURL     string
+	// BaseURL     string
 	RestyClient *resty.Client
 	Credentials *azidentity.DefaultAzureCredential
 }
@@ -29,11 +29,11 @@ func NewFabricClient() (*FabricClient, error) {
 	var err error
 
 	c := FabricClient{
-		BaseURL:     BaseURL,
+		// BaseURL:     BaseURL,
 		RestyClient: resty.New(),
 	}
 
-	c.RestyClient.SetBaseURL(c.BaseURL).AddRetryCondition(
+	c.RestyClient.SetBaseURL(constBaseURL).AddRetryCondition(
 		func(r *resty.Response, err error) bool {
 			// Including "err != nil" emulates the default retry behavior for errors encountered during the request.
 			return err != nil || r.StatusCode() == http.StatusTooManyRequests
@@ -55,5 +55,9 @@ func (c *FabricClient) prepRequest() (*resty.Request, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token while preparing the request: %v", err)
 	}
+
+	// Ensure the base URL is set for this client instance
+	c.RestyClient.SetBaseURL(constBaseURL)
+
 	return c.RestyClient.R().SetAuthToken(token), nil
 }

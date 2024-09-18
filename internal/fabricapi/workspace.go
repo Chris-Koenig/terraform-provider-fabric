@@ -12,20 +12,21 @@ func (c FabricClient) CreateWorkspace(workspaceToCreate WorkspaceCreateModel) (*
 
 	client, err := c.prepRequest()
 	if err != nil {
-		return nil, fmt.Errorf("failed to prepare the request for CreateGroup: %v", err)
+		return nil, fmt.Errorf("failed to prepare the request for CreateWorkspace: %v", err)
 	}
-	baseURL := "https://api.fabric.microsoft.com"
-	url := fmt.Sprintf("%s/v1/workspaces", baseURL)
+
+	url := "/v1/workspaces"
+
 	resp, err := client.SetResult(ws).
-		// SetQueryParam("workspaceV2", "True").
 		SetBody(workspaceToCreate).
 		Post(url)
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to create group: %v", err)
+		return nil, fmt.Errorf("failed to create workspace: %v %s", err, url)
 	}
 
 	if resp.IsError() {
-		return nil, fmt.Errorf("failed to create group: %v", resp.Error())
+		return nil, fmt.Errorf("failed to create workspace: %v %s", resp.Error(), url)
 	}
 
 	return ws, nil
@@ -62,11 +63,10 @@ func (c *FabricClient) GetWorkspace(workspaceId string) (*WorkspaceReadModel, er
 		return nil, fmt.Errorf("failed to prepare the request for GetGroups: %v", err)
 	}
 
-	baseURL := "https://api.fabric.microsoft.com"
-	url := fmt.Sprintf("%s/v1/workspaces/%s", baseURL, workspaceId)
+	// baseURL := "https://api.fabric.microsoft.com"
+	url := fmt.Sprintf("/v1/workspaces/%s", workspaceId)
 	resp, err := client.SetResult(workspace).Get(url)
 
-	//resp, err := client.SetResult(workspace).Get(fmt.Sprintf("/v1/workspaces/%s", workspaceId))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get workspace: %v", err)
 	}
@@ -82,7 +82,7 @@ func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*Workspa
 
 	var err error
 	groups := &WorkspacesReadModel{}
-	baseURL := "https://api.fabric.microsoft.com"
+	// baseURL := "https://api.fabric.microsoft.com"
 	client, err := c.prepRequest()
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare the request for GetGroups: %v", err)
@@ -98,7 +98,7 @@ func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*Workspa
 		client.SetQueryParam("$skip", strconv.Itoa(skip))
 	}
 
-	resp, err := client.SetResult(&groups).Get(baseURL + "/v1/workspaces")
+	resp, err := client.SetResult(&groups).Get("/v1/workspaces")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get groups: %v", err)
 	}
@@ -122,8 +122,8 @@ func (c *FabricClient) UpdateWorkspace(workspaceIdToUpdate string, workspaceToUp
 
 	body := workspaceToUpdate
 
-	baseURL := "https://api.fabric.microsoft.com"
-	url := fmt.Sprintf("%s/v1/workspaces/%s", baseURL, workspaceIdToUpdate)
+	// baseURL := "https://api.fabric.microsoft.com"
+	url := fmt.Sprintf("/v1/workspaces/%s", workspaceIdToUpdate)
 	resp, err := client.
 		SetBody(body).
 		Patch(url)
