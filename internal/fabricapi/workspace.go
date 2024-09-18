@@ -82,7 +82,7 @@ func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*Workspa
 
 	var err error
 	groups := &WorkspacesReadModel{}
-
+	baseURL := "https://api.fabric.microsoft.com"
 	client, err := c.prepRequest()
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare the request for GetGroups: %v", err)
@@ -98,7 +98,7 @@ func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*Workspa
 		client.SetQueryParam("$skip", strconv.Itoa(skip))
 	}
 
-	resp, err := client.SetResult(&groups).Get("/v1/workspaces")
+	resp, err := client.SetResult(&groups).Get(baseURL + "/v1/workspaces")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get groups: %v", err)
 	}
@@ -115,22 +115,25 @@ func (c *FabricClient) UpdateWorkspace(workspaceIdToUpdate string, workspaceToUp
 	var err error
 
 	client, err := c.prepRequest()
+
 	if err != nil {
-		return fmt.Errorf("failed to prepare the request for GetGroups: %v", err)
+		return fmt.Errorf("failed to prepare the request update workspace: %v", err)
 	}
 
 	body := workspaceToUpdate
 
+	baseURL := "https://api.fabric.microsoft.com"
+	url := fmt.Sprintf("%s/v1/workspaces/%s", baseURL, workspaceIdToUpdate)
 	resp, err := client.
 		SetBody(body).
-		Patch(fmt.Sprintf("/v1/workspaces/%s", workspaceIdToUpdate))
+		Patch(url)
 
 	if err != nil {
-		return fmt.Errorf("failed to update group: %v", err)
+		return fmt.Errorf("failed to update workspace: %v %s", err, url)
 	}
 
 	if resp.IsError() {
-		return fmt.Errorf("failed to get group: [%v] %s", resp.StatusCode(), resp.String())
+		return fmt.Errorf("failed to update workspace: [%v] %s", resp.StatusCode(), resp.String()+" URL: "+url)
 	}
 
 	return nil

@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -76,11 +78,13 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 	tflog.Debug(ctx, "Workspace created successfully")
 
 	tflog.Debug(ctx, "Populate the response with the workspace data")
+
 	state.Id = types.StringValue(workspaceCreated.Id)
 	state.Name = types.StringValue(workspaceCreated.DisplayName)
 	state.Description = types.StringValue(workspaceCreated.Description)
 
 	diags := resp.State.Set(ctx, &state)
+
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -169,6 +173,9 @@ func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The id of the workspace",
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "the description of the workspace.",
@@ -199,11 +206,10 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 	updateRequest = fabricapi.WorkspaceUpdateModel{
 		DisplayName: plan.Name.ValueString(),
 		Description: plan.Description.ValueString(),
-		// Id:          plan.Id.ValueString(),
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Updating workspace with name: %s", state.Name.ValueString()))
-	err = r.client.UpdateWorkspace(plan.Id.ValueString(), updateRequest)
+	err = r.client.UpdateWorkspace(state.Id.ValueString(), updateRequest)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot update workspace with Id %s", state.Id.ValueString()), err.Error())
 		return
