@@ -2,8 +2,8 @@ package fabricapi
 
 // Group represents a response detailing a Power BI group (workspace).
 type WorkspaceReadModel struct {
-	Id          string `json:"id"`          // The workspace ID
-	DisplayName string `json:"displayName"` // The group name
+	Id          string `json:"id"`
+	DisplayName string `json:"displayName"`
 	Description string `json:"description"`
 }
 

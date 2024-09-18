@@ -138,7 +138,9 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 	}
 
 	if !data.Id.IsNull() {
-		workspace, err = d.client.GetWorkspace(data.Id.ValueString())
+
+		workspace, err = fabricapi.GetItem[fabricapi.WorkspaceReadModel](data.Id.ValueString(), "workspaces", *d.client)
+
 		if err != nil {
 			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", data.Id), err.Error())
 			return

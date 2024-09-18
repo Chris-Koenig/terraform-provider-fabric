@@ -69,7 +69,9 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 		DisplayName: config.Name.ValueString(),
 	}
 
-	workspaceCreated, err = r.client.CreateWorkspace(workspaceToCreate)
+	// workspaceCreated, err = r.client.CreateWorkspace(workspaceToCreate)
+
+	workspaceCreated, err = fabricapi.CreateItem[fabricapi.WorkspaceCreateModel, fabricapi.WorkspaceReadModel](workspaceToCreate, "workspaces", *r.client)
 
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot create workspace with name %s", config.Name.ValueString()), err.Error())
@@ -95,7 +97,6 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 func (r *WorkspaceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state WorkspaceProviderModel
 	var err error
-	var workspaceToDelete fabricapi.WorkspaceDeleteModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
@@ -105,9 +106,7 @@ func (r *WorkspaceResource) Delete(ctx context.Context, req resource.DeleteReque
 
 	tflog.Debug(ctx, fmt.Sprintf("Deleting workspace with name: %s", state.Name.ValueString()))
 
-	workspaceToDelete.Id = state.Id.ValueString()
-
-	err = r.client.DeleteWorkspace(workspaceToDelete)
+	err = fabricapi.DeleteItem(state.Id.ValueString(), "workspaces", *r.client)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot delete workspace with Id %s", state.Id.ValueString()), err.Error())
 		return
@@ -139,7 +138,9 @@ func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Reading workspace with name: %s", state.Name.ValueString()))
-	workspace, err = r.client.GetWorkspace(state.Id.ValueString())
+
+	workspace, err = fabricapi.GetItem[fabricapi.WorkspaceReadModel](state.Id.ValueString(), "workspaces", *r.client)
+
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
 		return
@@ -209,7 +210,9 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Updating workspace with name: %s", state.Name.ValueString()))
-	err = r.client.UpdateWorkspace(state.Id.ValueString(), updateRequest)
+
+	err = fabricapi.UpdateItem[fabricapi.WorkspaceUpdateModel](state.Id.ValueString(), "workspaces", updateRequest, *r.client)
+
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot update workspace with Id %s", state.Id.ValueString()), err.Error())
 		return
@@ -219,7 +222,9 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 	tflog.Debug(ctx, "Populate the response with the workspace data")
 	tflog.Debug(ctx, fmt.Sprintf("Reading workspace with name: %s", plan.Name.ValueString()))
 
-	workspaceUpdated, err = r.client.GetWorkspace(state.Id.ValueString())
+	// workspaceUpdated, err = r.client.GetWorkspace(state.Id.ValueString())
+
+	workspaceUpdated, err = fabricapi.GetItem[fabricapi.WorkspaceReadModel](state.Id.ValueString(), "workspaces", *r.client)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
 		return
