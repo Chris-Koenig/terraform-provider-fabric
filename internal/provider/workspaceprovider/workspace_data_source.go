@@ -48,7 +48,6 @@ func (d *WorkspaceDataSource) Schema(_ context.Context, req datasource.SchemaReq
 			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "The id of the workspace",
-				Optional:            true,
 				Computed:            true,
 			},
 			"description": schema.StringAttribute{
