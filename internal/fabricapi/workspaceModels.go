@@ -9,17 +9,19 @@ type WorkspaceReadModel struct {
 }
 
 type WorkspaceCreateModel struct {
-	DisplayName string `json:"displayname"` // The name
-	// 	CapacityId  string `json:"capacityId"`  // The name
-	// 	Description string `json:"description"` // The name
+	DisplayName string `json:"displayname"`
+	CapacityId  string `json:"capacityId"`
+	Description string `json:"description"`
 }
 
 type WorkspaceDeleteModel struct {
-	Id string `json:"id"` // The group (workspace) id
+	Id string `json:"id"`
 }
 
 type WorkspaceUpdateModel struct {
-	Name string `json:"name"` // The group (workspace) name
+	Id          string `json:"id"`
+	DisplayName string `json:"displayname"`
+	Description string `json:"description"`
 }
 
 // Groups represents a response detailing a list of Power BI groups (workspaces).

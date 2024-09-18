@@ -62,7 +62,13 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 
 	tflog.Debug(ctx, fmt.Sprintf("Creating workspace with name: %s", config.Name.ValueString()))
 
-	workspaceCreated, err = r.client.CreateWorkspace(config.Name.ValueString())
+	var workspaceToCreate = fabricapi.WorkspaceCreateModel{
+		Description: config.Description.ValueString(),
+		DisplayName: config.Name.ValueString(),
+		CapacityId:  config.CapacityId.ValueString(),
+	}
+
+	workspaceCreated, err = r.client.CreateWorkspace(workspaceToCreate)
 
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot create workspace with name %s", config.Name.ValueString()), err.Error())
@@ -73,10 +79,8 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 	tflog.Debug(ctx, "Populate the response with the workspace data")
 	state.Id = types.StringValue(workspaceCreated.Id)
 	state.Name = types.StringValue(workspaceCreated.DisplayName)
-	state.CapacityId = types.StringValue("")
-	state.Description = types.StringValue("")
-
-	//state.IsOnDedicatedCapacity = types.BoolValue(workspaceCreated.IsOnDedicatedCapacity)
+	state.CapacityId = types.StringValue(workspaceCreated.CapacityId)
+	state.Description = types.StringValue(workspaceCreated.Description)
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -87,23 +91,27 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 
 // Delete deletes the Power BI workspace.
 func (r *WorkspaceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// var state models.Workspace
-	// var err error
+	var state WorkspaceProviderModel
+	var err error
+	var workspaceToDelete fabricapi.WorkspaceDeleteModel
 
-	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-	// tflog.Debug(ctx, fmt.Sprintf("Deleting workspace with name: %s", state.Name.ValueString()))
-	// err = r.client.DeleteGroup(state.Id.ValueString())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(fmt.Sprintf("Cannot delete workspace with Id %s", state.Id.ValueString()), err.Error())
-	// 	return
-	// }
+	tflog.Debug(ctx, fmt.Sprintf("Deleting workspace with name: %s", state.Name.ValueString()))
 
-	// tflog.Debug(ctx, "Workspace deleted successfully")
+	workspaceToDelete.Id = state.Id.ValueString()
+
+	err = r.client.DeleteWorkspace(workspaceToDelete)
+	if err != nil {
+		resp.Diagnostics.AddError(fmt.Sprintf("Cannot delete workspace with Id %s", state.Id.ValueString()), err.Error())
+		return
+	}
+
+	tflog.Debug(ctx, "Workspace deleted successfully")
 }
 
 // ImportState implements resource.ResourceWithImportState.
@@ -184,48 +192,50 @@ func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest
 // Update updates the Power BI workspace.
 func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
-	// var plan models.Workspace
-	// var state models.Workspace
-	// var workspace *pbiModels.Group
-	// var updateRequest *pbiModels.UpdateGroupRequest
-	// var err error
+	var plan WorkspaceProviderModel
+	var state WorkspaceProviderModel
+	var workspaceUpdated *fabricapi.WorkspaceReadModel
+	var updateRequest fabricapi.WorkspaceUpdateModel
+	var err error
 
-	// resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-	// updateRequest = &pbiModels.UpdateGroupRequest{
-	// 	Name: plan.Name.ValueString(),
-	// }
+	updateRequest = fabricapi.WorkspaceUpdateModel{
+		DisplayName: plan.Name.ValueString(),
+		Description: plan.Description.ValueString(),
+		Id:          plan.Id.ValueString(),
+		// CapacityId:  plan.CapacityId.ValueString(),
+	}
 
-	// tflog.Debug(ctx, fmt.Sprintf("Updating workspace with name: %s", state.Name.ValueString()))
-	// err = r.client.UpdateGroup(state.Id.ValueString(), updateRequest)
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(fmt.Sprintf("Cannot update workspace with Id %s", state.Id.ValueString()), err.Error())
-	// 	return
-	// }
+	tflog.Debug(ctx, fmt.Sprintf("Updating workspace with name: %s", state.Name.ValueString()))
+	err = r.client.UpdateWorkspace(updateRequest)
+	if err != nil {
+		resp.Diagnostics.AddError(fmt.Sprintf("Cannot update workspace with Id %s", state.Id.ValueString()), err.Error())
+		return
+	}
 
-	// tflog.Debug(ctx, "Workspace updated successfully")
+	tflog.Debug(ctx, "Workspace updated successfully")
+	tflog.Debug(ctx, "Populate the response with the workspace data")
+	tflog.Debug(ctx, fmt.Sprintf("Reading workspace with name: %s", plan.Name.ValueString()))
+	workspaceUpdated, err = r.client.GetWorkspace(state.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
+		return
+	}
 
-	// tflog.Debug(ctx, "Populate the response with the workspace data")
-	// tflog.Debug(ctx, fmt.Sprintf("Reading workspace with name: %s", plan.Name.ValueString()))
-	// workspace, err = r.client.GetGroup(state.Id.ValueString())
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
-	// 	return
-	// }
+	state.Id = types.StringValue(workspaceUpdated.Id)
+	state.Name = types.StringValue(workspaceUpdated.DisplayName)
+	state.Description = types.StringValue(workspaceUpdated.Description)
+	state.CapacityId = types.StringValue(workspaceUpdated.CapacityId)
 
-	// state.Id = types.StringValue(workspace.Id)
-	// state.Name = types.StringValue(workspace.Name)
-	// state.IsReadOnly = types.BoolValue(workspace.IsReadOnly)
-	// state.IsOnDedicatedCapacity = types.BoolValue(workspace.IsOnDedicatedCapacity)
-
-	// diags := resp.State.Set(ctx, &state)
-	// resp.Diagnostics.Append(diags...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
+	diags := resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }

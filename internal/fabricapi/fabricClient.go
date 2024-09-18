@@ -9,7 +9,7 @@ import (
 )
 
 // BaseURL - Default Power BI URL.
-const BaseURL string = "https://api.fabric.com"
+const BaseURL string = "https://api.fabric.microsoft.com"
 
 // Client - Power BI API client.
 type FabricClient struct {

@@ -5,13 +5,10 @@ import (
 	"strconv"
 )
 
-// CreateGroup creates a new group.
-// https://learn.microsoft.com/en-us/rest/api/power-bi/groups/create-group
-func (c FabricClient) CreateWorkspace(displayName string) (*WorkspaceReadModel, error) {
+func (c FabricClient) CreateWorkspace(workspaceToCreate WorkspaceCreateModel) (*WorkspaceReadModel, error) {
 
 	var err error
 	ws := &WorkspaceReadModel{}
-	ws1 := &WorkspaceCreateModel{DisplayName: displayName}
 
 	client, err := c.prepRequest()
 	if err != nil {
@@ -21,7 +18,7 @@ func (c FabricClient) CreateWorkspace(displayName string) (*WorkspaceReadModel, 
 	url := fmt.Sprintf("%s/v1/workspaces", baseURL)
 	resp, err := client.SetResult(ws).
 		// SetQueryParam("workspaceV2", "True").
-		SetBody(ws1).
+		SetBody(workspaceToCreate).
 		Post(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create group: %v", err)
@@ -34,10 +31,8 @@ func (c FabricClient) CreateWorkspace(displayName string) (*WorkspaceReadModel, 
 	return ws, nil
 }
 
-// DeleteGroup deletes a group by its ID.
-// https://learn.microsoft.com/en-us/rest/api/power-bi/groups/delete-group
-func (c FabricClient) DeleteWorkspace(workspaceId string) error {
-	// DELETE https://api.fabric.com/v1.0/myorg/groups/{groupId}
+func (c FabricClient) DeleteWorkspace(workspaceTodelete WorkspaceDeleteModel) error {
+
 	var err error
 
 	client, err := c.prepRequest()
@@ -45,7 +40,7 @@ func (c FabricClient) DeleteWorkspace(workspaceId string) error {
 		return fmt.Errorf("failed to prepare the request for DeleteGroup: %v", err)
 	}
 
-	resp, err := client.Delete(fmt.Sprintf("/v1.0/myorg/groups/%s", workspaceId))
+	resp, err := client.Delete(fmt.Sprintf("/v1/workspaces/%s", workspaceTodelete.Id))
 	if err != nil {
 		return fmt.Errorf("failed to delete group: %v", err)
 	}
@@ -57,9 +52,7 @@ func (c FabricClient) DeleteWorkspace(workspaceId string) error {
 	return nil
 }
 
-// GetGroup retrieves a group by its ID.
 func (c *FabricClient) GetWorkspace(workspaceId string) (*WorkspaceReadModel, error) {
-	// GET https://api.fabric.microsoft.com/v1/workspaces/{workspaceid}
 
 	var err error
 	workspace := &WorkspaceReadModel{}
@@ -85,10 +78,7 @@ func (c *FabricClient) GetWorkspace(workspaceId string) (*WorkspaceReadModel, er
 	return workspace, nil
 }
 
-// GetGroups retrieves a list of groups.
-// https://learn.microsoft.com/en-us/rest/api/power-bi/groups/get-groups
 func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*WorkspacesReadModel, error) {
-	// GET https://api.powerbi.com/v1.0/myorg/groups
 
 	var err error
 	groups := &WorkspacesReadModel{}
@@ -108,7 +98,7 @@ func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*Workspa
 		client.SetQueryParam("$skip", strconv.Itoa(skip))
 	}
 
-	resp, err := client.SetResult(&groups).Get("/v1.0/myorg/groups")
+	resp, err := client.SetResult(&groups).Get("/v1/workspaces")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get groups: %v", err)
 	}
@@ -120,30 +110,27 @@ func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*Workspa
 	return groups, nil
 }
 
-// // UpdateGroup updates a specified workspace.
-// // https://learn.microsoft.com/en-us/rest/api/power-bi/groups/update-group
-// func (c *FabricClient) UpdateWorkspace(groupId string, updateGroupRequest *workspace.WorkspaceModel) error {
-// 	// PATCH https://api.powerbi.com/v1.0/myorg/groups/{groupId}
+func (c *FabricClient) UpdateWorkspace(workspaceToUpdate WorkspaceUpdateModel) error {
 
-// 	var err error
+	var err error
 
-// 	client, err := c.prepRequest()
-// 	if err != nil {
-// 		return fmt.Errorf("failed to prepare the request for GetGroups: %v", err)
-// 	}
+	client, err := c.prepRequest()
+	if err != nil {
+		return fmt.Errorf("failed to prepare the request for GetGroups: %v", err)
+	}
 
-// 	body := updateGroupRequest.Validate()
+	body := workspaceToUpdate
 
-// 	resp, err := client.
-// 		SetBody(body).
-// 		Patch(fmt.Sprintf("/v1.0/myorg/groups/%s", groupId))
-// 	if err != nil {
-// 		return fmt.Errorf("failed to update groups: %v", err)
-// 	}
+	resp, err := client.
+		SetBody(body).
+		Patch(fmt.Sprintf("/v1/workspaces/%s", body.Id))
+	if err != nil {
+		return fmt.Errorf("failed to update groups: %v", err)
+	}
 
-// 	if resp.IsError() {
-// 		return fmt.Errorf("failed to get groups: [%v] %s", resp.StatusCode(), resp.String())
-// 	}
+	if resp.IsError() {
+		return fmt.Errorf("failed to get groups: [%v] %s", resp.StatusCode(), resp.String())
+	}
 
-// 	return nil
-// }
+	return nil
+}
