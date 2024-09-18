@@ -3,16 +3,15 @@ package fabricapi
 import (
 	"fmt"
 	"strconv"
-	"terraform-provider-fabric/internal/fabricapi/fabricapimodels"
 )
 
 // CreateGroup creates a new group.
 // https://learn.microsoft.com/en-us/rest/api/power-bi/groups/create-group
-func (c *FabricClient) CreateWorkspace(displayName string) (*fabricapimodels.WorkspaceReadModel, error) {
+func (c FabricClient) CreateWorkspace(displayName string) (*WorkspaceReadModel, error) {
 
 	var err error
-	ws := &fabricapimodels.WorkspaceReadModel{}
-	ws1 := &fabricapimodels.WorkspaceCreateModel{DisplayName: displayName}
+	ws := &WorkspaceReadModel{}
+	ws1 := &WorkspaceCreateModel{DisplayName: displayName}
 
 	client, err := c.prepRequest()
 	if err != nil {
@@ -37,7 +36,7 @@ func (c *FabricClient) CreateWorkspace(displayName string) (*fabricapimodels.Wor
 
 // DeleteGroup deletes a group by its ID.
 // https://learn.microsoft.com/en-us/rest/api/power-bi/groups/delete-group
-func (c *FabricClient) DeleteWorkspace(workspaceId string) error {
+func (c FabricClient) DeleteWorkspace(workspaceId string) error {
 	// DELETE https://api.fabric.com/v1.0/myorg/groups/{groupId}
 	var err error
 
@@ -59,11 +58,11 @@ func (c *FabricClient) DeleteWorkspace(workspaceId string) error {
 }
 
 // GetGroup retrieves a group by its ID.
-func (c *FabricClient) GetWorkspace(workspaceId string) (*fabricapimodels.WorkspaceReadModel, error) {
+func (c *FabricClient) GetWorkspace(workspaceId string) (*WorkspaceReadModel, error) {
 	// GET https://api.fabric.microsoft.com/v1/workspaces/{workspaceid}
 
 	var err error
-	workspace := &fabricapimodels.WorkspaceReadModel{}
+	workspace := &WorkspaceReadModel{}
 
 	client, err := c.prepRequest()
 	if err != nil {
@@ -88,11 +87,11 @@ func (c *FabricClient) GetWorkspace(workspaceId string) (*fabricapimodels.Worksp
 
 // GetGroups retrieves a list of groups.
 // https://learn.microsoft.com/en-us/rest/api/power-bi/groups/get-groups
-func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*fabricapimodels.WorkspacesReadModel, error) {
+func (c *FabricClient) GetWorkspaces(filter string, top int, skip int) (*WorkspacesReadModel, error) {
 	// GET https://api.powerbi.com/v1.0/myorg/groups
 
 	var err error
-	groups := &fabricapimodels.WorkspacesReadModel{}
+	groups := &WorkspacesReadModel{}
 
 	client, err := c.prepRequest()
 	if err != nil {

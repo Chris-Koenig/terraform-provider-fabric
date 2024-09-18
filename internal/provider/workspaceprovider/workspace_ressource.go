@@ -1,11 +1,9 @@
-package provider
+package workspaceprovider
 
 import (
 	"context"
 	"fmt"
 	"terraform-provider-fabric/internal/fabricapi"
-	"terraform-provider-fabric/internal/fabricapi/fabricapimodels"
-	"terraform-provider-fabric/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -50,9 +48,10 @@ func (r *WorkspaceResource) Configure(_ context.Context, req resource.ConfigureR
 
 // Create creates a new Power BI workspace.
 func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var config models.WorkspaceModel
-	var state models.WorkspaceModel
-	var workspaceCreated *fabricapimodels.WorkspaceReadModel
+
+	var config WorkspaceProviderModel
+	var state WorkspaceProviderModel
+	var workspaceCreated *fabricapi.WorkspaceReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
@@ -74,7 +73,9 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 	tflog.Debug(ctx, "Populate the response with the workspace data")
 	state.Id = types.StringValue(workspaceCreated.Id)
 	state.Name = types.StringValue(workspaceCreated.DisplayName)
-	state.IsReadOnly = types.BoolValue(workspaceCreated.IsReadOnly)
+	state.CapacityId = types.StringValue("")
+	state.Description = types.StringValue("")
+
 	//state.IsOnDedicatedCapacity = types.BoolValue(workspaceCreated.IsOnDedicatedCapacity)
 
 	diags := resp.State.Set(ctx, &state)
@@ -117,8 +118,8 @@ func (r *WorkspaceResource) Metadata(_ context.Context, req resource.MetadataReq
 
 // Read updates the state with the data from the Power BI service.
 func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state models.WorkspaceModel
-	var workspace *fabricapimodels.WorkspaceReadModel
+	var state WorkspaceProviderModel
+	var workspace *fabricapi.WorkspaceReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -136,7 +137,7 @@ func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	state.Id = types.StringValue(workspace.Id)
 	state.Name = types.StringValue(workspace.DisplayName)
-	state.IsReadOnly = types.BoolValue(workspace.IsReadOnly)
+
 	//state.IsOnDedicatedCapacity = types.BoolValue(workspace.IsOnDedicatedCapacity)
 
 	diags := resp.State.Set(ctx, &state)
@@ -164,10 +165,6 @@ func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest
 				MarkdownDescription: "Indicates whether the workspace is read-only",
 				Computed:            true,
 			},
-			// "is_on_dedicated_capacity": schema.BoolAttribute{
-			// 	MarkdownDescription: "Indicates whether the workspace is on dedicated capacity",
-			// 	Computed:            true,
-			// },
 		},
 	}
 }

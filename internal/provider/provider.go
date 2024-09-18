@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 	"terraform-provider-fabric/internal/fabricapi"
+	"terraform-provider-fabric/internal/provider/workspaceprovider"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -31,7 +32,6 @@ type FabricProviderModel struct {
 	Client_secret   types.String `tfsdk:"client_secret"`
 	Tenant_id       types.String `tfsdk:"tenant_id"`
 	Subscription_id types.String `tfsdk:"subscription_id"`
-	BaseURL         types.String `tfsdk:"base_url"`
 }
 
 func (p *FabricProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -43,12 +43,7 @@ func (p *FabricProvider) Metadata(ctx context.Context, req provider.MetadataRequ
 func (p *FabricProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"base_url": schema.StringAttribute{
-				MarkdownDescription: "The base url for the Fabric API. Default to \"https://api.fabric.com\"",
-				Description:         "The base url for the Fabric API. Default to \"https://api.fabric.com\"",
-				Optional:            false,
-				Required:            true,
-			},
+
 			"client_id": schema.StringAttribute{
 				MarkdownDescription: "ID of the service principal.",
 				Description:         "ID of the service principal.",
@@ -86,7 +81,7 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		return
 	}
 
-	client, err := fabricapi.NewFabricClient(data.BaseURL.String())
+	client, err := fabricapi.NewFabricClient()
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create client", err.Error())
 		return
@@ -98,13 +93,13 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewWorkspaceResource,
+		workspaceprovider.NewWorkspaceResource,
 	}
 }
 
 func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewWorkspaceDataSource,
+		workspaceprovider.NewWorkspaceDataSource,
 	}
 }
 

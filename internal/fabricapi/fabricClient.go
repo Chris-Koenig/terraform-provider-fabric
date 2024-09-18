@@ -24,17 +24,13 @@ type FabricClient struct {
 // If the host URL is not provided, the default BaseURL will be used.
 // It also retrieves a token using the GetToken method and assigns it to the Client's Token field.
 // If an error occurs while retrieving the token, an error is returned.
-func NewFabricClient(host string) (*FabricClient, error) {
+func NewFabricClient() (*FabricClient, error) {
 
 	var err error
 
 	c := FabricClient{
 		BaseURL:     BaseURL,
 		RestyClient: resty.New(),
-	}
-
-	if host != "" {
-		c.BaseURL = host
 	}
 
 	c.RestyClient.SetBaseURL(c.BaseURL).AddRetryCondition(

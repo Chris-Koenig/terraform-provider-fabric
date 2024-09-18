@@ -1,11 +1,10 @@
-package provider
+package workspaceprovider
 
 import (
 	"context"
 	"fmt"
+
 	"terraform-provider-fabric/internal/fabricapi"
-	"terraform-provider-fabric/internal/fabricapi/fabricapimodels"
-	"terraform-provider-fabric/internal/provider/models"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -52,14 +51,14 @@ func (d *WorkspaceDataSource) Schema(_ context.Context, req datasource.SchemaReq
 				Optional:            true,
 				Computed:            true,
 			},
-			"is_read_only": schema.BoolAttribute{
-				MarkdownDescription: "Indicates whether the workspace is read-only",
+			"description": schema.StringAttribute{
+				MarkdownDescription: "the description of the workspace.",
 				Computed:            true,
 			},
-			// "is_on_dedicated_capacity": schema.BoolAttribute{
-			// 	MarkdownDescription: "Indicates whether the workspace is on dedicated capacity",
-			// 	Computed:            true,
-			// },
+			"capacityId": schema.StringAttribute{
+				MarkdownDescription: "the id of the capacity to which the workspace belongs.",
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -74,7 +73,9 @@ func (d *WorkspaceDataSource) Schema(_ context.Context, req datasource.SchemaReq
 //
 // Returns: None.
 func (d *WorkspaceDataSource) ValidateConfig(ctx context.Context, req datasource.ValidateConfigRequest, resp *datasource.ValidateConfigResponse) {
-	var data models.WorkspaceModel
+
+	var data WorkspaceProviderModel
+
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
@@ -132,8 +133,8 @@ func (d *WorkspaceDataSource) Configure(ctx context.Context, req datasource.Conf
 //
 // Returns: None.
 func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data models.WorkspaceModel
-	var workspace *fabricapimodels.WorkspaceReadModel
+	var data WorkspaceProviderModel
+	var workspace *fabricapi.WorkspaceReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -175,10 +176,11 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
+	// Mapping the Values from the REST API to the provider model
 	data.Id = types.StringValue(workspace.Id)
 	data.Name = types.StringValue(workspace.DisplayName)
-	data.IsReadOnly = types.BoolValue(workspace.IsReadOnly)
-	// data.IsOnDedicatedCapacity = types.BoolValue(workspace.IsOnDedicatedCapacity)
+	data.CapacityId = types.StringValue("")
+	data.Description = types.StringValue("")
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

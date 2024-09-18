@@ -1,17 +1,5 @@
-resource "fabric_workspace" "examplews" {
-  name = "testtf"
-}
-
-
-terraform {
-  required_providers {
-    fabric = {
-      source  = "hashicorp.com/edu/fabric"
-      version = ">= 0.0.0"
-    }
-  }
-}
-
-provider "fabric" {
-
+data "fabric_workspace" "my.Workspace" {
+  Name        = "Name of the Workspace"
+  Description = "Description Text of the Workspace"
+  CapacityId  = "0000-00000-0000-0000-0000"
 }
