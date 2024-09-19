@@ -16,9 +16,9 @@ func GetItem[TItemResponseModel any](itemId string, apiObjectName string, worksp
 	}
 
 	if workspaceId == "" {
-		url = "/v1/" + apiObjectName
+		url = fmt.Sprintf("/v1/%s/%s", apiObjectName, itemId)
 	} else if workspaceId != "" {
-		url = "/v1/workspaces/" + workspaceId + "/" + apiObjectName
+		url = "/v1/workspaces/" + workspaceId + "/" + apiObjectName + "/" + itemId
 	}
 	resp, err := client.SetResult(item).Get(url)
 

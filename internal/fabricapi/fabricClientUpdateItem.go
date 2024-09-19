@@ -15,9 +15,9 @@ func UpdateItem[TUpdate any](itemIdToUpdate string, apiObjectName string, itemUp
 	}
 
 	if workspaceId == "" {
-		url = "/v1/" + apiObjectName
+		url = "/v1/" + apiObjectName + "/" + itemIdToUpdate
 	} else if workspaceId != "" {
-		url = "/v1/workspaces/" + workspaceId + "/" + apiObjectName
+		url = "/v1/workspaces/" + workspaceId + "/" + apiObjectName + "/" + itemIdToUpdate
 	}
 
 	resp, err := client.
