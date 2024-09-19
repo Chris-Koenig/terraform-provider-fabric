@@ -45,8 +45,8 @@ func (p *FabricProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 		Attributes: map[string]schema.Attribute{
 
 			"client_id": schema.StringAttribute{
-				MarkdownDescription: "ID of the service principal.",
-				Description:         "ID of the service principal.",
+				MarkdownDescription: "ID (GUID) of the service principal.",
+				Description:         "ID (GUID) of the service principal.",
 				Optional:            false,
 				Required:            true,
 			},
@@ -57,14 +57,14 @@ func (p *FabricProvider) Schema(_ context.Context, _ provider.SchemaRequest, res
 				Required:            true,
 			},
 			"tenant_id": schema.StringAttribute{
-				MarkdownDescription: "Your Entra ID Tenant ID",
-				Description:         "Your Entra ID Tenant ID",
+				MarkdownDescription: "Your Entra ID Tenant ID (GUID)",
+				Description:         "Your Entra ID Tenant ID (GUID)",
 				Optional:            false,
 				Required:            true,
 			},
 			"subscription_id": schema.StringAttribute{
-				MarkdownDescription: "Your Subscription ID",
-				Description:         "Your Subscription ID",
+				MarkdownDescription: "Your Subscription ID (GUID)",
+				Description:         "Your Subscription ID (GUID)",
 				Optional:            false,
 				Required:            true,
 			},

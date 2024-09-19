@@ -167,20 +167,20 @@ func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				MarkdownDescription: "The name of the workspace",
+				MarkdownDescription: "name of the workspace. Max Size is 200 characters.",
 				Optional:            false,
 				Required:            true,
 				Computed:            false,
 			},
 			"id": schema.StringAttribute{
-				MarkdownDescription: "The id of the workspace",
+				MarkdownDescription: "ID (GUID) of the workspace. This value is read-only and will be set by the fabric service itself.",
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "the description of the workspace.",
+				MarkdownDescription: "description of the workspace. Max size is 2000 characters",
 				Optional:            true,
 				Required:            false,
 				Computed:            false,
@@ -222,8 +222,6 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 	tflog.Debug(ctx, "Workspace updated successfully")
 	tflog.Debug(ctx, "Populate the response with the workspace data")
 	tflog.Debug(ctx, fmt.Sprintf("Reading workspace with name: %s", plan.Name.ValueString()))
-
-	// workspaceUpdated, err = r.client.GetWorkspace(state.Id.ValueString())
 
 	workspaceUpdated, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](state.Id.ValueString(), "workspaces", *r.client)
 	if err != nil {
