@@ -19,14 +19,14 @@ func DeleteItem(idToDelete string, apiObjectName string, workspaceId string, c F
 	} else if workspaceId != "" {
 		url = "/v1/workspaces/" + workspaceId + "/" + apiObjectName
 	}
-
-	resp, err := client.Delete(fmt.Sprintf("%s/%s", url, idToDelete))
+	finalUrl := fmt.Sprintf("%s/%s", url, idToDelete)
+	resp, err := client.Delete(finalUrl)
 	if err != nil {
-		return fmt.Errorf("failed to delete group: %v", err)
+		return fmt.Errorf("failed to delete %s: %v", apiObjectName, err)
 	}
 
 	if resp.IsError() {
-		return fmt.Errorf("failed to delete group: %v", resp.Error())
+		return fmt.Errorf("failed to delete %s: %v", apiObjectName, finalUrl)
 	}
 
 	return nil

@@ -96,24 +96,28 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 
 // Delete deletes the Power BI workspace.
 func (r *WorkspaceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state WorkspaceProviderModel
-	var err error
 
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	var state WorkspaceProviderModel
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+
+	var err error
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Deleting workspace with name: %s", state.Name.ValueString()))
+	// tflog.Debug(ctx, fmt.Sprintf("Deleting workspace with name: %s", entitityToDelete.Name.ValueString()))
 
 	err = fabricapi.DeleteItem(state.Id.ValueString(), "workspaces", "", *r.client)
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Cannot delete workspace with Id %s", state.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError(
+			"Error Deleting Workspace",
+			"Could not delete, unexpected error: "+err.Error(),
+		)
 		return
 	}
 
-	tflog.Debug(ctx, "Workspace deleted successfully")
 }
 
 // ImportState implements resource.ResourceWithImportState.
