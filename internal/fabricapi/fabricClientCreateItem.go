@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-// Define a generic CreateItem method
 func CreateItem[TCreate any, TRead any](itemToCreate TCreate, apiObjectName string, c FabricClient) (*TRead, error) {
 
 	var err error
