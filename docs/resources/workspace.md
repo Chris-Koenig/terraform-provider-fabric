@@ -24,7 +24,7 @@ resource "fabric_workspace" "myWorkspace" {
 
 ### Required
 
-- `name` (String) name of the workspace. Max Size is 200 characters
+- `name` (String) name of the workspace. Max Size is 200 characters.
 
 ### Optional
 
