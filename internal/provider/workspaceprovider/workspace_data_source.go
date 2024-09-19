@@ -157,7 +157,7 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 	// Mapping the Values from the REST API to the provider model
 	data.Id = types.StringValue(workspace.Id)
 	data.Name = types.StringValue(workspace.DisplayName)
-	data.Description = types.StringValue(workspace.Description)
+	data.Description = workspace.Description
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

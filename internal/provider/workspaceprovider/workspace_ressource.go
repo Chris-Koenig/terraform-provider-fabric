@@ -66,7 +66,7 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 	tflog.Debug(ctx, fmt.Sprintf("Creating workspace with name: %s", config.Name.ValueString()))
 
 	var workspaceToCreate = fabricClientModels.WorkspaceCreateRequestModel{
-		Description: config.Description.ValueString(),
+		Description: config.Description,
 		DisplayName: config.Name.ValueString(),
 	}
 
@@ -84,7 +84,7 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 
 	state.Id = types.StringValue(workspaceCreated.Id)
 	state.Name = types.StringValue(workspaceCreated.DisplayName)
-	state.Description = types.StringValue(workspaceCreated.Description)
+	state.Description = workspaceCreated.Description
 
 	diags := resp.State.Set(ctx, &state)
 
@@ -153,7 +153,7 @@ func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	state.Id = types.StringValue(workspace.Id)
 	state.Name = types.StringValue(workspace.DisplayName)
-	state.Description = types.StringValue(workspace.Description)
+	state.Description = workspace.Description
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -185,8 +185,8 @@ func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "description of the workspace. Max size is 2000 characters",
-				Optional:            true,
-				Required:            false,
+				Optional:            false,
+				Required:            true,
 				Computed:            false,
 			},
 		},
@@ -211,7 +211,7 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 
 	updateRequest = fabricClientModels.WorkspaceUpdateRequestModel{
 		DisplayName: plan.Name.ValueString(),
-		Description: plan.Description.ValueString(),
+		Description: plan.Description,
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Updating workspace with name: %s", state.Name.ValueString()))
@@ -235,7 +235,7 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 
 	state.Id = types.StringValue(workspaceUpdated.Id)
 	state.Name = types.StringValue(workspaceUpdated.DisplayName)
-	state.Description = types.StringValue(workspaceUpdated.Description)
+	state.Description = workspaceUpdated.Description
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

@@ -30,7 +30,7 @@ func CreateItem[TCreate any, TRead any](itemToCreate TCreate, apiObjectName stri
 	}
 
 	if resp.IsError() {
-		return nil, fmt.Errorf("failed to create item: %v %s", resp.Error(), url)
+		return nil, fmt.Errorf("failed to create item: %v %s", resp, url)
 	}
 
 	return result, nil
