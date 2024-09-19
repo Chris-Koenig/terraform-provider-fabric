@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"terraform-provider-fabric/internal/fabricapi"
+	"terraform-provider-fabric/internal/fabricapi/fabricClientModels"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -128,7 +129,8 @@ func (d *WorkspaceDataSource) Configure(ctx context.Context, req datasource.Conf
 // Returns: None.
 func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data WorkspaceProviderModel
-	var workspace *fabricapi.WorkspaceReadModel
+
+	var workspace *fabricClientModels.WorkspaceReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -139,7 +141,7 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 	if !data.Id.IsNull() {
 
-		workspace, err = fabricapi.GetItem[fabricapi.WorkspaceReadModel](data.Id.ValueString(), "workspaces", *d.client)
+		workspace, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](data.Id.ValueString(), "workspaces", *d.client)
 
 		if err != nil {
 			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", data.Id), err.Error())

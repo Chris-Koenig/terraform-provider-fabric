@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"terraform-provider-fabric/internal/fabricapi"
+	"terraform-provider-fabric/internal/fabricapi/fabricClientModels"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -53,7 +54,7 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 
 	var config WorkspaceProviderModel
 	var state WorkspaceProviderModel
-	var workspaceCreated *fabricapi.WorkspaceReadModel
+	var workspaceCreated *fabricClientModels.WorkspaceReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
@@ -64,14 +65,14 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 
 	tflog.Debug(ctx, fmt.Sprintf("Creating workspace with name: %s", config.Name.ValueString()))
 
-	var workspaceToCreate = fabricapi.WorkspaceCreateModel{
+	var workspaceToCreate = fabricClientModels.WorkspaceCreateRequestModel{
 		Description: config.Description.ValueString(),
 		DisplayName: config.Name.ValueString(),
 	}
 
 	// workspaceCreated, err = r.client.CreateWorkspace(workspaceToCreate)
 
-	workspaceCreated, err = fabricapi.CreateItem[fabricapi.WorkspaceCreateModel, fabricapi.WorkspaceReadModel](workspaceToCreate, "workspaces", *r.client)
+	workspaceCreated, err = fabricapi.CreateItem[fabricClientModels.WorkspaceCreateRequestModel, fabricClientModels.WorkspaceReadModel](workspaceToCreate, "workspaces", *r.client)
 
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot create workspace with name %s", config.Name.ValueString()), err.Error())
@@ -128,7 +129,7 @@ func (r *WorkspaceResource) Metadata(_ context.Context, req resource.MetadataReq
 // Read updates the state with the data from the Power BI service.
 func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state WorkspaceProviderModel
-	var workspace *fabricapi.WorkspaceReadModel
+	var workspace *fabricClientModels.WorkspaceReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -139,7 +140,7 @@ func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	tflog.Debug(ctx, fmt.Sprintf("Reading workspace with name: %s", state.Name.ValueString()))
 
-	workspace, err = fabricapi.GetItem[fabricapi.WorkspaceReadModel](state.Id.ValueString(), "workspaces", *r.client)
+	workspace, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](state.Id.ValueString(), "workspaces", *r.client)
 
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
@@ -193,8 +194,8 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 
 	var plan WorkspaceProviderModel
 	var state WorkspaceProviderModel
-	var workspaceUpdated *fabricapi.WorkspaceReadModel
-	var updateRequest fabricapi.WorkspaceUpdateModel
+	var workspaceUpdated *fabricClientModels.WorkspaceReadModel
+	var updateRequest fabricClientModels.WorkspaceUpdateRequestModel
 	var err error
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -204,14 +205,14 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	updateRequest = fabricapi.WorkspaceUpdateModel{
+	updateRequest = fabricClientModels.WorkspaceUpdateRequestModel{
 		DisplayName: plan.Name.ValueString(),
 		Description: plan.Description.ValueString(),
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("Updating workspace with name: %s", state.Name.ValueString()))
 
-	err = fabricapi.UpdateItem[fabricapi.WorkspaceUpdateModel](state.Id.ValueString(), "workspaces", updateRequest, *r.client)
+	err = fabricapi.UpdateItem[fabricClientModels.WorkspaceUpdateRequestModel](state.Id.ValueString(), "workspaces", updateRequest, *r.client)
 
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot update workspace with Id %s", state.Id.ValueString()), err.Error())
@@ -224,7 +225,7 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 
 	// workspaceUpdated, err = r.client.GetWorkspace(state.Id.ValueString())
 
-	workspaceUpdated, err = fabricapi.GetItem[fabricapi.WorkspaceReadModel](state.Id.ValueString(), "workspaces", *r.client)
+	workspaceUpdated, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](state.Id.ValueString(), "workspaces", *r.client)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
 		return
