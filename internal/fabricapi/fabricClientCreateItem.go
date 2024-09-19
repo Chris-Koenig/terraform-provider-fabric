@@ -4,9 +4,10 @@ import (
 	"fmt"
 )
 
-func CreateItem[TCreate any, TRead any](itemToCreate TCreate, apiObjectName string, c FabricClient) (*TRead, error) {
+func CreateItem[TCreate any, TRead any](itemToCreate TCreate, apiObjectName string, workspaceId string, c FabricClient) (*TRead, error) {
 
 	var err error
+	var url string
 	result := new(TRead) // Create a new instance of the generic TRead type
 
 	client, err := c.prepRequest()
@@ -14,7 +15,12 @@ func CreateItem[TCreate any, TRead any](itemToCreate TCreate, apiObjectName stri
 		return nil, fmt.Errorf("failed to prepare the request for CreateItem: %v", err)
 	}
 
-	url := "/v1/" + apiObjectName
+	if workspaceId == "" {
+		url = "/v1/" + apiObjectName
+	} else if workspaceId != "" {
+		url = "/v1/workspaces/" + workspaceId + "/" + apiObjectName
+	}
+
 	resp, err := client.SetResult(result).
 		SetBody(itemToCreate).
 		Post(url)

@@ -4,17 +4,22 @@ import (
 	"fmt"
 )
 
-func UpdateItem[TUpdate any](itemIdToUpdate string, itemNameToUpdate string, itemUpdateRequestModel TUpdate, c FabricClient) error {
+func UpdateItem[TUpdate any](itemIdToUpdate string, apiObjectName string, itemUpdateRequestModel TUpdate, workspaceId string, c FabricClient) error {
 
 	var err error
-
+	var url string
 	client, err := c.prepRequest()
 
 	if err != nil {
 		return fmt.Errorf("failed to prepare the request update workspace: %v", err)
 	}
 
-	url := fmt.Sprintf("/v1/%s/%s", itemNameToUpdate, itemIdToUpdate)
+	if workspaceId == "" {
+		url = "/v1/" + apiObjectName
+	} else if workspaceId != "" {
+		url = "/v1/workspaces/" + workspaceId + "/" + apiObjectName
+	}
+
 	resp, err := client.
 		SetBody(itemUpdateRequestModel).
 		Patch(url)

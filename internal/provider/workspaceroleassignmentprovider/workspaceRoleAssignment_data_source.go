@@ -1,4 +1,4 @@
-package workspaceprovider
+package workspaceroleassignmentprovider
 
 import (
 	"context"
@@ -9,49 +9,63 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var (
-	_ datasource.DataSource                   = &WorkspaceDataSource{} // Ensure that WorkspaceDataSource implements the DataSource interface.
-	_ datasource.DataSourceWithValidateConfig = &WorkspaceDataSource{} // Ensure that WorkspaceDataSource implements the DataSourceWithValidateConfig interface.
-	_ datasource.DataSourceWithConfigure      = &WorkspaceDataSource{} // Ensure that WorkspaceDataSource implements the DataSourceWithConfigure interface.
+	_ datasource.DataSource                   = &WorkspaceRoleAssignmentDataSource{} // Ensure that WorkspaceDataSource implements the DataSource interface.
+	_ datasource.DataSourceWithValidateConfig = &WorkspaceRoleAssignmentDataSource{} // Ensure that WorkspaceDataSource implements the DataSourceWithValidateConfig interface.
+	_ datasource.DataSourceWithConfigure      = &WorkspaceRoleAssignmentDataSource{} // Ensure that WorkspaceDataSource implements the DataSourceWithConfigure interface.
 )
 
 // NewWorkspaceDataSource is a function that creates a new instance of the WorkspaceDataSource.
-func NewWorkspaceDataSource() datasource.DataSource {
-	return &WorkspaceDataSource{}
+func NewWorkspaceRoleAssignmentDataSource() datasource.DataSource {
+	return &WorkspaceRoleAssignmentDataSource{}
 }
 
 // WorkspaceDataSource is a struct that represents the Power BI workspace data source.
-type WorkspaceDataSource struct {
+type WorkspaceRoleAssignmentDataSource struct {
 	client *fabricapi.FabricClient
 }
 
 // Metadata is a method that sets the metadata for the WorkspaceDataSource.
-func (d *WorkspaceDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_workspace"
+func (d *WorkspaceRoleAssignmentDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_workspaceroleassignment"
 }
 
 // Schema is a method that sets the schema for the WorkspaceDataSource.
-func (d *WorkspaceDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *WorkspaceRoleAssignmentDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Fabric workspace data source",
 
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				MarkdownDescription: "name of the workspace",
+			"id": schema.StringAttribute{
+				MarkdownDescription: "ID (GUID) of the workspace role assignment. This value is read-only.",
+				Computed:            false,
+				Required:            true,
+			},
+			"workspace_id": schema.StringAttribute{
+				MarkdownDescription: "ID (GUID) of the workspace. This is required.",
 				Computed:            true,
 			},
-			"id": schema.StringAttribute{
-				MarkdownDescription: "ID (GUID) of the workspace",
-				Optional:            true,
+			"principal": schema.SingleNestedAttribute{
+				MarkdownDescription: "Details of the principal (user or group) associated with the workspace role assignment.",
+				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+					"id": schema.StringAttribute{
+						MarkdownDescription: "ID of the principal. This is required.",
+						Computed:            true,
+					},
+					"type": schema.StringAttribute{
+						MarkdownDescription: "Type of the principal (e.g., 'User', 'Group'). This is required.",
+						Computed:            true,
+					},
+				},
 			},
-			"description": schema.StringAttribute{
-				MarkdownDescription: "description of the workspace",
+			"role": schema.StringAttribute{
+				MarkdownDescription: "Role assigned to the principal ('Member', 'Admin', 'Contributor', 'Viewer'). This is required.",
 				Computed:            true,
 			},
 		},
@@ -67,9 +81,9 @@ func (d *WorkspaceDataSource) Schema(_ context.Context, req datasource.SchemaReq
 //   - resp: The ValidateConfigResponse object to store the validation results.
 //
 // Returns: None.
-func (d *WorkspaceDataSource) ValidateConfig(ctx context.Context, req datasource.ValidateConfigRequest, resp *datasource.ValidateConfigResponse) {
+func (d *WorkspaceRoleAssignmentDataSource) ValidateConfig(ctx context.Context, req datasource.ValidateConfigRequest, resp *datasource.ValidateConfigResponse) {
 
-	var data WorkspaceProviderModel
+	var data WorkspaceRoleAssignmentProviderModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
@@ -77,16 +91,16 @@ func (d *WorkspaceDataSource) ValidateConfig(ctx context.Context, req datasource
 		return
 	}
 
-	bothNull := data.Name.IsNull() && data.Id.IsNull()
-	bothSet := !data.Name.IsNull() && !data.Id.IsNull()
+	// bothNull := data.Name.IsNull() && data.Id.IsNull()
+	// bothSet := !data.Name.IsNull() && !data.Id.IsNull()
 
-	if bothNull || bothSet {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("name"),
-			"Invalid attribute configuration",
-			"one of 'name' or 'id' must be set",
-		)
-	}
+	// if bothNull || bothSet {
+	// 	resp.Diagnostics.AddAttributeError(
+	// 		path.Root("name"),
+	// 		"Invalid attribute configuration",
+	// 		"one of 'name' or 'id' must be set",
+	// 	)
+	// }
 }
 
 // Configure is a method that configures the WorkspaceDataSource.
@@ -98,7 +112,7 @@ func (d *WorkspaceDataSource) ValidateConfig(ctx context.Context, req datasource
 //   - resp: The ConfigureResponse object to store the configuration results.
 //
 // Returns: None.
-func (d *WorkspaceDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *WorkspaceRoleAssignmentDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -127,10 +141,10 @@ func (d *WorkspaceDataSource) Configure(ctx context.Context, req datasource.Conf
 //   - resp: The ReadResponse object to store the read results.
 //
 // Returns: None.
-func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data WorkspaceProviderModel
+func (d *WorkspaceRoleAssignmentDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data WorkspaceRoleAssignmentProviderModel
 
-	var workspace *fabricClientModels.WorkspaceReadModel
+	var roleAssignment *fabricClientModels.WorkspaceRoleAssignmentReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -141,7 +155,7 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 	if !data.Id.IsNull() {
 
-		workspace, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](data.Id.ValueString(), "workspaces", "", *d.client)
+		roleAssignment, err = fabricapi.GetItem[fabricClientModels.WorkspaceRoleAssignmentReadModel](data.Id.ValueString(), "roleassignments", data.Workspace_Id.ValueString(), *d.client)
 
 		if err != nil {
 			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", data.Id), err.Error())
@@ -149,15 +163,16 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 	}
 
-	if workspace == nil {
-		resp.Diagnostics.AddError("No workspace found", "No workspace found with the specified name or id.")
+	if roleAssignment == nil {
+		resp.Diagnostics.AddError("No RoleAssignment found", "No workspace found with the specified name or id.")
 		return
 	}
 
 	// Mapping the Values from the REST API to the provider model
-	data.Id = types.StringValue(workspace.Id)
-	data.Name = types.StringValue(workspace.DisplayName)
-	data.Description = types.StringValue(workspace.Description)
+	data.Id = types.StringValue(roleAssignment.Id)
+	// data.Role = types.StringValue(roleAssignment.Role)
+	// data.Principal.Id = types.StringValue(roleAssignment.Principal.Id)
+	// data.Principal.Type = types.StringValue(roleAssignment.Principal.Type)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
