@@ -8,5 +8,5 @@ import (
 type WorkspaceProviderModel struct {
 	Id          types.String `tfsdk:"id"`
 	Name        types.String `tfsdk:"name"`
-	Description string       `tfsdk:"description"`
+	Description types.String `tfsdk:"description"`
 }
