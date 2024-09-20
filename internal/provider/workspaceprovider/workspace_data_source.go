@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var (
@@ -128,23 +127,23 @@ func (d *WorkspaceDataSource) Configure(ctx context.Context, req datasource.Conf
 //
 // Returns: None.
 func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data WorkspaceProviderModel
+	var config, state WorkspaceProviderModel
 
 	var workspace *fabricClientModels.WorkspaceReadModel
 	var err error
 
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if !data.Id.IsNull() {
+	if !config.Id.IsNull() {
 
-		workspace, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](data.Id.ValueString(), "workspaces", *d.client)
+		workspace, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](config.Id.ValueString(), "workspaces", "", *d.client)
 
 		if err != nil {
-			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", data.Id), err.Error())
+			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", config.Id), err.Error())
 			return
 		}
 	}
@@ -154,12 +153,9 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	// Mapping the Values from the REST API to the provider model
-	data.Id = types.StringValue(workspace.Id)
-	data.Name = types.StringValue(workspace.DisplayName)
-	data.Description = types.StringValue(workspace.Description)
+	state = ConvertApiModelToTerraformModel(workspace)
 
-	diags := resp.State.Set(ctx, &data)
+	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

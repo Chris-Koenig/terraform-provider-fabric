@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -51,40 +50,27 @@ func (r *WorkspaceResource) Configure(_ context.Context, req resource.ConfigureR
 
 // Create creates a new Power BI workspace.
 func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-
-	var config WorkspaceProviderModel
-	var state WorkspaceProviderModel
+	var plan, state WorkspaceProviderModel
 	var workspaceCreated *fabricClientModels.WorkspaceReadModel
 	var err error
 
-	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Creating workspace with name: %s", config.Name.ValueString()))
+	var workspaceToCreate = ConvertTerraformModelToApiCreateModel(plan)
 
-	var workspaceToCreate = fabricClientModels.WorkspaceCreateRequestModel{
-		Description: config.Description.ValueString(),
-		DisplayName: config.Name.ValueString(),
-	}
-
-	// workspaceCreated, err = r.client.CreateWorkspace(workspaceToCreate)
-
-	workspaceCreated, err = fabricapi.CreateItem[fabricClientModels.WorkspaceCreateRequestModel, fabricClientModels.WorkspaceReadModel](workspaceToCreate, "workspaces", *r.client)
+	workspaceCreated, err = fabricapi.CreateItem[fabricClientModels.WorkspaceCreateRequestModel, fabricClientModels.WorkspaceReadModel](workspaceToCreate, "workspaces", "", *r.client)
 
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Cannot create workspace with name %s", config.Name.ValueString()), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("Cannot create workspace with name %s", plan.Name.ValueString()), err.Error())
 		return
 	}
-	tflog.Debug(ctx, "Workspace created successfully")
 
-	tflog.Debug(ctx, "Populate the response with the workspace data")
-
-	state.Id = types.StringValue(workspaceCreated.Id)
-	state.Name = types.StringValue(workspaceCreated.DisplayName)
-	state.Description = types.StringValue(workspaceCreated.Description)
+	// convert the api data model in the terraform data model
+	state = ConvertApiModelToTerraformModel(workspaceCreated)
 
 	diags := resp.State.Set(ctx, &state)
 
@@ -107,7 +93,7 @@ func (r *WorkspaceResource) Delete(ctx context.Context, req resource.DeleteReque
 
 	tflog.Debug(ctx, fmt.Sprintf("Deleting workspace with name: %s", state.Name.ValueString()))
 
-	err = fabricapi.DeleteItem(state.Id.ValueString(), "workspaces", *r.client)
+	err = fabricapi.DeleteItem(state.Id.ValueString(), "workspaces", "", *r.client)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot delete workspace with Id %s", state.Id.ValueString()), err.Error())
 		return
@@ -128,30 +114,29 @@ func (r *WorkspaceResource) Metadata(_ context.Context, req resource.MetadataReq
 
 // Read updates the state with the data from the Power BI service.
 func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state WorkspaceProviderModel
+	var stateCurrent, stateNew WorkspaceProviderModel
 	var workspace *fabricClientModels.WorkspaceReadModel
 	var err error
 
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &stateCurrent)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading workspace with name: %s", state.Name.ValueString()))
+	tflog.Debug(ctx, fmt.Sprintf("Reading workspace with name: %s", stateCurrent.Name.ValueString()))
 
-	workspace, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](state.Id.ValueString(), "workspaces", *r.client)
+	workspace, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](stateCurrent.Id.ValueString(), "workspaces", "", *r.client)
 
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", stateCurrent.Id.ValueString()), err.Error())
 		return
 	}
 
-	state.Id = types.StringValue(workspace.Id)
-	state.Name = types.StringValue(workspace.DisplayName)
-	state.Description = types.StringValue(workspace.Description)
+	// convert the api data model in the terraform data model
+	stateNew = ConvertApiModelToTerraformModel(workspace)
 
-	diags := resp.State.Set(ctx, &state)
+	diags := resp.State.Set(ctx, &stateNew)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -160,12 +145,14 @@ func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 // Schema sets the schema for the WorkspaceResource.
 func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+
 	resp.Schema = schema.Schema{
 
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Fabric workspace data source",
 
 		Attributes: map[string]schema.Attribute{
+
 			"name": schema.StringAttribute{
 				MarkdownDescription: "name of the workspace. Max Size is 200 characters.",
 				Optional:            false,
@@ -181,9 +168,8 @@ func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "description of the workspace. Max size is 2000 characters",
-				Optional:            true,
-				Required:            false,
-				Computed:            false,
+				Optional:            false,
+				Required:            true,
 			},
 		},
 	}
@@ -192,8 +178,8 @@ func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest
 // Update updates the Power BI workspace.
 func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
-	var plan WorkspaceProviderModel
-	var state WorkspaceProviderModel
+	var plan, state WorkspaceProviderModel
+
 	var workspaceUpdated *fabricClientModels.WorkspaceReadModel
 	var updateRequest fabricClientModels.WorkspaceUpdateRequestModel
 	var err error
@@ -205,14 +191,11 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	updateRequest = fabricClientModels.WorkspaceUpdateRequestModel{
-		DisplayName: plan.Name.ValueString(),
-		Description: plan.Description.ValueString(),
-	}
+	updateRequest = ConvertTerraformModelToApiUpdateModel(plan)
 
 	tflog.Debug(ctx, fmt.Sprintf("Updating workspace with name: %s", state.Name.ValueString()))
 
-	err = fabricapi.UpdateItem[fabricClientModels.WorkspaceUpdateRequestModel](state.Id.ValueString(), "workspaces", updateRequest, *r.client)
+	err = fabricapi.UpdateItem[fabricClientModels.WorkspaceUpdateRequestModel](state.Id.ValueString(), "workspaces", updateRequest, "", *r.client)
 
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot update workspace with Id %s", state.Id.ValueString()), err.Error())
@@ -223,15 +206,14 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 	tflog.Debug(ctx, "Populate the response with the workspace data")
 	tflog.Debug(ctx, fmt.Sprintf("Reading workspace with name: %s", plan.Name.ValueString()))
 
-	workspaceUpdated, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](state.Id.ValueString(), "workspaces", *r.client)
+	workspaceUpdated, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](state.Id.ValueString(), "workspaces", "", *r.client)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
 		return
 	}
 
-	state.Id = types.StringValue(workspaceUpdated.Id)
-	state.Name = types.StringValue(workspaceUpdated.DisplayName)
-	state.Description = types.StringValue(workspaceUpdated.Description)
+	// convert the api data model in the terraform data model
+	state = ConvertApiModelToTerraformModel(workspaceUpdated)
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
