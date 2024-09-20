@@ -3,14 +3,14 @@ module terraform-provider-fabric
 go 1.22.7
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.11.1
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
 	github.com/hashicorp/terraform-plugin-docs v0.19.4
 	github.com/hashicorp/terraform-plugin-framework v1.11.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 )
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/internal v1.8.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/internal v1.10.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.23.0 // indirect
