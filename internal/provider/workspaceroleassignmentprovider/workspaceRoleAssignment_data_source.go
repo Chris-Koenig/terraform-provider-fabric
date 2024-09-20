@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 )
 
 var (
@@ -48,7 +48,8 @@ func (d *WorkspaceRoleAssignmentDataSource) Schema(_ context.Context, req dataso
 			},
 			"workspace_id": schema.StringAttribute{
 				MarkdownDescription: "ID (GUID) of the workspace. This is required.",
-				Computed:            true,
+				Computed:            false,
+				Required:            true,
 			},
 			"principal": schema.SingleNestedAttribute{
 				MarkdownDescription: "Details of the principal (user or group) associated with the workspace role assignment.",
@@ -91,16 +92,16 @@ func (d *WorkspaceRoleAssignmentDataSource) ValidateConfig(ctx context.Context, 
 		return
 	}
 
-	// bothNull := data.Name.IsNull() && data.Id.IsNull()
-	// bothSet := !data.Name.IsNull() && !data.Id.IsNull()
+	bothNull := data.Workspace_Id.IsNull() && data.Id.IsNull()
+	bothSet := !data.Workspace_Id.IsNull() && !data.Id.IsNull()
 
-	// if bothNull || bothSet {
-	// 	resp.Diagnostics.AddAttributeError(
-	// 		path.Root("name"),
-	// 		"Invalid attribute configuration",
-	// 		"one of 'name' or 'id' must be set",
-	// 	)
-	// }
+	if bothNull || bothSet {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("name"),
+			"Invalid attribute configuration",
+			"one of 'name' or 'id' must be set",
+		)
+	}
 }
 
 // Configure is a method that configures the WorkspaceDataSource.
@@ -142,13 +143,11 @@ func (d *WorkspaceRoleAssignmentDataSource) Configure(ctx context.Context, req d
 //
 // Returns: None.
 func (d *WorkspaceRoleAssignmentDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data WorkspaceRoleAssignmentProviderModel
-
+	var data, state WorkspaceRoleAssignmentProviderModel
 	var roleAssignment *fabricClientModels.WorkspaceRoleAssignmentReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -169,12 +168,9 @@ func (d *WorkspaceRoleAssignmentDataSource) Read(ctx context.Context, req dataso
 	}
 
 	// Mapping the Values from the REST API to the provider model
-	data.Id = types.StringValue(roleAssignment.Id)
-	// data.Role = types.StringValue(roleAssignment.Role)
-	// data.Principal.Id = types.StringValue(roleAssignment.Principal.Id)
-	// data.Principal.Type = types.StringValue(roleAssignment.Principal.Type)
+	state = ConvertApiModelToTerraformModel(roleAssignment, data.Workspace_Id.ValueString())
 
-	diags := resp.State.Set(ctx, &data)
+	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

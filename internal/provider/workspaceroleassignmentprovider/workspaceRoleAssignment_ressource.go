@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -102,7 +101,7 @@ func (r *WorkspaceRoleAssignmentResource) Schema(_ context.Context, req resource
 
 // Read updates the state with the data from the Power BI service.
 func (r *WorkspaceRoleAssignmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state WorkspaceRoleAssignmentProviderModel
+	var state, newState WorkspaceRoleAssignmentProviderModel
 	var workspaceRoleAssignmentCreated *fabricClientModels.WorkspaceRoleAssignmentReadModel
 	var err error
 
@@ -121,12 +120,10 @@ func (r *WorkspaceRoleAssignmentResource) Read(ctx context.Context, req resource
 		return
 	}
 
-	state.Id = types.StringValue(workspaceRoleAssignmentCreated.Id)
-	state.Role = workspaceRoleAssignmentCreated.Role
-	state.Principal.Id = workspaceRoleAssignmentCreated.Principal.Id
-	state.Principal.Type = workspaceRoleAssignmentCreated.Principal.Type
+	// Mapping the Values from the REST API to the provider model
+	newState = ConvertApiModelToTerraformModel(workspaceRoleAssignmentCreated, state.Workspace_Id.ValueString())
 
-	diags := resp.State.Set(ctx, &state)
+	diags := resp.State.Set(ctx, &newState)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -135,9 +132,7 @@ func (r *WorkspaceRoleAssignmentResource) Read(ctx context.Context, req resource
 
 // Create creates a new Power BI workspace.
 func (r *WorkspaceRoleAssignmentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-
-	var config WorkspaceRoleAssignmentProviderModel
-	var state WorkspaceRoleAssignmentProviderModel
+	var config, state WorkspaceRoleAssignmentProviderModel
 	var workspaceRoleAssignmentCreated *fabricClientModels.WorkspaceRoleAssignmentReadModel
 	var err error
 
@@ -149,29 +144,16 @@ func (r *WorkspaceRoleAssignmentResource) Create(ctx context.Context, req resour
 
 	tflog.Debug(ctx, fmt.Sprintf("Creating roleassignments with id: %s", config.Id.ValueString()))
 
-	var workspaceReleAssignmentToCreate = fabricClientModels.WorkspaceRoleAssignmentCreateRequestModel{
-		Role:      config.Role,
-		Principal: fabricClientModels.Principal(config.Principal),
-	}
+	var workspaceReleAssignmentToCreate = ConvertTerraformModelToApiCreateModel(config)
 
 	workspaceRoleAssignmentCreated, err = fabricapi.CreateItem[fabricClientModels.WorkspaceRoleAssignmentCreateRequestModel, fabricClientModels.WorkspaceRoleAssignmentReadModel](workspaceReleAssignmentToCreate, "roleAssignments", config.Workspace_Id.ValueString(), *r.client)
-
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot create roleassignments with id %s", config.Id.ValueString()), err.Error())
 		return
 	}
-	tflog.Debug(ctx, "Workspace created successfully")
 
-	tflog.Debug(ctx, "Populate the response with the workspace data")
-
-	state.Id = types.StringValue(workspaceRoleAssignmentCreated.Id)
-	state.Role = workspaceRoleAssignmentCreated.Role
-	state.Principal.Id = workspaceRoleAssignmentCreated.Principal.Id
-	state.Principal.Type = workspaceRoleAssignmentCreated.Principal.Type
-	state.Workspace_Id = config.Workspace_Id
-
+	state = ConvertApiModelToTerraformModel(workspaceRoleAssignmentCreated, config.Workspace_Id.ValueString())
 	diags := resp.State.Set(ctx, &state)
-
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -193,10 +175,7 @@ func (r *WorkspaceRoleAssignmentResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	updateRequest = fabricClientModels.WorkspaceRoleAssignmentUpdateRequestModel{
-		Principal: fabricClientModels.Principal(plan.Principal),
-		Role:      plan.Role,
-	}
+	updateRequest = ConvertTerraformModelToApiUpdateModel(plan)
 
 	tflog.Debug(ctx, fmt.Sprintf("Updating roleAssignments with name: %s", state.Id.ValueString()))
 
@@ -207,21 +186,13 @@ func (r *WorkspaceRoleAssignmentResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	tflog.Debug(ctx, "Workspace updated successfully")
-	tflog.Debug(ctx, "Populate the response with the workspace data")
-	tflog.Debug(ctx, fmt.Sprintf("Reading workspace with name: %s", plan.Id.ValueString()))
-
 	workspaceRoleAssignmentUpdated, err = fabricapi.GetItem[fabricClientModels.WorkspaceRoleAssignmentReadModel](state.Id.ValueString(), "roleAssignments", state.Workspace_Id.ValueString(), *r.client)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
 		return
 	}
 
-	state.Id = types.StringValue(workspaceRoleAssignmentUpdated.Id)
-	state.Role = workspaceRoleAssignmentUpdated.Role
-	state.Principal.Id = workspaceRoleAssignmentUpdated.Principal.Id
-	state.Principal.Type = workspaceRoleAssignmentUpdated.Principal.Type
-	state.Workspace_Id = plan.Workspace_Id
+	state = ConvertApiModelToTerraformModel(workspaceRoleAssignmentUpdated, plan.Workspace_Id.ValueString())
 
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
