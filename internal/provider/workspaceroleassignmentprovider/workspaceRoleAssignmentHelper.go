@@ -13,7 +13,7 @@ func ConvertApiModelToTerraformModel(apiModel *fabricClientModels.WorkspaceRoleA
 	terraformModel.Workspace_Id = types.StringValue(targetWorkspaceId)
 	terraformModel.Role = types.StringValue(apiModel.Role)
 
-	// The Principal must be instanciate
+	// The principal must be instantiate
 	terraformModel.Principal = &Principal{
 		Id:   types.StringValue(apiModel.Principal.Id),
 		Type: types.StringValue(apiModel.Principal.Type),
