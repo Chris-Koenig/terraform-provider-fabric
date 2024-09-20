@@ -11,7 +11,7 @@ import (
 // Default Fabric BI URL.
 const constBaseURL string = "https://api.fabric.microsoft.com"
 
-// Client - Power BI API client.
+// Client - FABRIC REST API client.
 type FabricClient struct {
 	// BaseURL     string
 	RestyClient *resty.Client
@@ -47,7 +47,7 @@ func NewFabricClient() (*FabricClient, error) {
 	return &c, nil
 }
 
-// prepRequest - Prepares a request for the Power BI API.
+// prepRequest - Prepares a request for the FABRIC REST API.
 // It sets the global request parameters and returns a pointer to a resty.Request.
 // It returns a pointer to a resty.Request and an error.
 func (c *FabricClient) prepRequest() (*resty.Request, error) {

@@ -17,12 +17,12 @@ var _ resource.Resource = &WorkspaceRoleAssignmentResource{}                // E
 var _ resource.ResourceWithImportState = &WorkspaceRoleAssignmentResource{} // Ensure that WorkspaceResource implements the ResourceWithImportState interface.
 var _ resource.ResourceWithConfigure = &WorkspaceRoleAssignmentResource{}   // Ensure that WorkspaceResource implements the ResourceWithConfigure interface.
 
-// NewWorkspaceResource is a function that creates a new instance of the WorkspaceResource.
+// New is a function that creates a new instance of the Resource.
 func NewWorkspaceRoleAssignmentResource() resource.Resource {
 	return &WorkspaceRoleAssignmentResource{}
 }
 
-// WorkspaceResource is a struct that represents the Power BI workspace resource.
+// Struct that represents the Fabric workspace resource.
 type WorkspaceRoleAssignmentResource struct {
 	client *fabricapi.FabricClient
 }
@@ -39,7 +39,7 @@ func (r *WorkspaceRoleAssignmentResource) Configure(_ context.Context, req resou
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			"Expected *powerbiapi.Client, got: %T. Please report this issue to the provider developers.",
+			"Expected *fabricapi.Client, got: %T. Please report this issue to the provider developers.",
 		)
 
 		return
@@ -55,30 +55,30 @@ func (r *WorkspaceRoleAssignmentResource) ImportState(_ context.Context, req res
 
 // Metadata sets the metadata for the WorkspaceResource.
 func (r *WorkspaceRoleAssignmentResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_workspaceroleassignment"
+	resp.TypeName = req.ProviderTypeName + "_" + itemName
 }
 
-// Schema sets the schema for the WorkspaceResource.
+// Schema sets the schema for the Resource.
 func (r *WorkspaceRoleAssignmentResource) Schema(_ context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Schema for Workspace Role Assignment",
+		MarkdownDescription: "Fabric " + itemName + " data source",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "ID (GUID) of the workspace role assignment. This value is read-only.",
+				MarkdownDescription: "ID (GUID) of the " + itemName + ". This value is read-only.",
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"workspace_id": schema.StringAttribute{
-				MarkdownDescription: "ID (GUID) of the workspace. This is required.",
+				MarkdownDescription: "ID (GUID) of the " + itemName + ". This is required.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"principal": schema.SingleNestedAttribute{
-				MarkdownDescription: "Details of the principal (user or group) associated with the workspace role assignment.",
+				MarkdownDescription: "Details of the principal (user or group) associated with the " + itemName + ".",
 				Required:            true,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
@@ -99,7 +99,7 @@ func (r *WorkspaceRoleAssignmentResource) Schema(_ context.Context, req resource
 	}
 }
 
-// Read updates the state with the data from the Power BI service.
+// Read updates the state with the data from the Fabric service.
 func (r *WorkspaceRoleAssignmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state, newState WorkspaceRoleAssignmentProviderModel
 	var workspaceRoleAssignmentCreated *fabricClientModels.WorkspaceRoleAssignmentReadModel
@@ -111,12 +111,12 @@ func (r *WorkspaceRoleAssignmentResource) Read(ctx context.Context, req resource
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading workspace with ID: %s", state.Id.ValueString()))
+	tflog.Debug(ctx, fmt.Sprintf("Reading "+itemName+" with ID: %s", state.Id.ValueString()))
 
-	workspaceRoleAssignmentCreated, err = fabricapi.GetItem[fabricClientModels.WorkspaceRoleAssignmentReadModel](state.Id.ValueString(), "roleassignments", state.Workspace_Id.ValueString(), *r.client)
+	workspaceRoleAssignmentCreated, err = fabricapi.GetItem[fabricClientModels.WorkspaceRoleAssignmentReadModel](state.Id.ValueString(), apiItemName, state.Workspace_Id.ValueString(), *r.client)
 
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve "+itemName+" with Id %s", state.Id.ValueString()), err.Error())
 		return
 	}
 
@@ -130,29 +130,29 @@ func (r *WorkspaceRoleAssignmentResource) Read(ctx context.Context, req resource
 	}
 }
 
-// Create creates a new Power BI workspace.
+// Create a new Fabric item.
 func (r *WorkspaceRoleAssignmentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var config, state WorkspaceRoleAssignmentProviderModel
+	var plan, state WorkspaceRoleAssignmentProviderModel
 	var workspaceRoleAssignmentCreated *fabricClientModels.WorkspaceRoleAssignmentReadModel
 	var err error
 
-	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Creating roleassignments with id: %s", config.Id.ValueString()))
+	tflog.Debug(ctx, fmt.Sprintf("Creating "+itemName+" with id: %s", plan.Id.ValueString()))
 
-	var workspaceReleAssignmentToCreate = ConvertTerraformModelToApiCreateModel(config)
+	var workspaceReleAssignmentToCreate = ConvertTerraformModelToApiCreateModel(plan)
 
-	workspaceRoleAssignmentCreated, err = fabricapi.CreateItem[fabricClientModels.WorkspaceRoleAssignmentCreateRequestModel, fabricClientModels.WorkspaceRoleAssignmentReadModel](workspaceReleAssignmentToCreate, "roleAssignments", config.Workspace_Id.ValueString(), *r.client)
+	workspaceRoleAssignmentCreated, err = fabricapi.CreateItem[fabricClientModels.WorkspaceRoleAssignmentCreateRequestModel, fabricClientModels.WorkspaceRoleAssignmentReadModel](workspaceReleAssignmentToCreate, "roleAssignments", plan.Workspace_Id.ValueString(), *r.client)
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Cannot create roleassignments with id %s", config.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("Cannot create "+itemName+" with id %s", plan.Id.ValueString()), err.Error())
 		return
 	}
 
-	state = ConvertApiModelToTerraformModel(workspaceRoleAssignmentCreated, config.Workspace_Id.ValueString())
+	state = ConvertApiModelToTerraformModel(workspaceRoleAssignmentCreated, plan.Workspace_Id.ValueString())
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -160,7 +160,7 @@ func (r *WorkspaceRoleAssignmentResource) Create(ctx context.Context, req resour
 	}
 }
 
-// Update updates the Power BI workspace.
+// Updates the Fabric item
 func (r *WorkspaceRoleAssignmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
 	var plan, state WorkspaceRoleAssignmentProviderModel
@@ -177,18 +177,18 @@ func (r *WorkspaceRoleAssignmentResource) Update(ctx context.Context, req resour
 
 	updateRequest = ConvertTerraformModelToApiUpdateModel(plan)
 
-	tflog.Debug(ctx, fmt.Sprintf("Updating roleAssignments with name: %s", state.Id.ValueString()))
+	tflog.Debug(ctx, fmt.Sprintf("Updating "+itemName+" with name: %s", state.Id.ValueString()))
 
-	err = fabricapi.UpdateItem[fabricClientModels.WorkspaceRoleAssignmentUpdateRequestModel](state.Id.ValueString(), "roleAssignments", updateRequest, plan.Workspace_Id.ValueString(), *r.client)
+	err = fabricapi.UpdateItem[fabricClientModels.WorkspaceRoleAssignmentUpdateRequestModel](state.Id.ValueString(), apiItemName, updateRequest, plan.Workspace_Id.ValueString(), *r.client)
 
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Cannot update workspace with Id %s", state.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("Cannot update "+itemName+" with Id %s", state.Id.ValueString()), err.Error())
 		return
 	}
 
-	workspaceRoleAssignmentUpdated, err = fabricapi.GetItem[fabricClientModels.WorkspaceRoleAssignmentReadModel](state.Id.ValueString(), "roleAssignments", state.Workspace_Id.ValueString(), *r.client)
+	workspaceRoleAssignmentUpdated, err = fabricapi.GetItem[fabricClientModels.WorkspaceRoleAssignmentReadModel](state.Id.ValueString(), apiItemName, state.Workspace_Id.ValueString(), *r.client)
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", state.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve "+itemName+" with Id %s", state.Id.ValueString()), err.Error())
 		return
 	}
 
@@ -201,7 +201,7 @@ func (r *WorkspaceRoleAssignmentResource) Update(ctx context.Context, req resour
 	}
 }
 
-// Delete deletes the Power BI workspace.
+// deletes the Fabric item.
 func (r *WorkspaceRoleAssignmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state WorkspaceRoleAssignmentProviderModel
 	var err error
@@ -212,13 +212,13 @@ func (r *WorkspaceRoleAssignmentResource) Delete(ctx context.Context, req resour
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Deleting roleassignments with id: %s", state.Id.ValueString()))
+	tflog.Debug(ctx, fmt.Sprintf("Deleting "+itemName+" with id: %s", state.Id.ValueString()))
 
-	err = fabricapi.DeleteItem(state.Id.ValueString(), "roleassignments", state.Workspace_Id.ValueString(), *r.client)
+	err = fabricapi.DeleteItem(state.Id.ValueString(), apiItemName, state.Workspace_Id.ValueString(), *r.client)
 	if err != nil {
-		resp.Diagnostics.AddError(fmt.Sprintf("Cannot delete roleassignments with Id %s", state.Id.ValueString()), err.Error())
+		resp.Diagnostics.AddError(fmt.Sprintf("Cannot delete "+itemName+" with Id %s", state.Id.ValueString()), err.Error())
 		return
 	}
 
-	tflog.Debug(ctx, "roleAssignments deleted successfully")
+	tflog.Debug(ctx, ""+itemName+" deleted successfully")
 }
