@@ -7,9 +7,10 @@ import (
 	"terraform-provider-fabric/internal/fabricapi"
 	"terraform-provider-fabric/internal/fabricapi/fabricClientModels"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var (
@@ -51,19 +52,14 @@ func (d *WorkspaceRoleAssignmentDataSource) Schema(_ context.Context, req dataso
 				Computed:            false,
 				Required:            true,
 			},
-			"principal": schema.SingleNestedAttribute{
-				MarkdownDescription: "Details of the principal (user or group) associated with the workspace role assignment.",
-				Computed:            true,
-				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
-						MarkdownDescription: "ID of the principal. This is required.",
-						Computed:            true,
-					},
-					"type": schema.StringAttribute{
-						MarkdownDescription: "Type of the principal (e.g., 'User', 'Group'). This is required.",
-						Computed:            true,
-					},
+			"principal": schema.ObjectAttribute{
+
+				Optional: true,
+				AttributeTypes: map[string]attr.Type{
+					"id":   types.StringType,
+					"type": types.StringType,
 				},
+				Description: "The principal assigned to the role.",
 			},
 			"role": schema.StringAttribute{
 				MarkdownDescription: "Role assigned to the principal ('Member', 'Admin', 'Contributor', 'Viewer'). This is required.",
@@ -84,24 +80,6 @@ func (d *WorkspaceRoleAssignmentDataSource) Schema(_ context.Context, req dataso
 // Returns: None.
 func (d *WorkspaceRoleAssignmentDataSource) ValidateConfig(ctx context.Context, req datasource.ValidateConfigRequest, resp *datasource.ValidateConfigResponse) {
 
-	var data WorkspaceRoleAssignmentProviderModel
-
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	bothNull := data.Workspace_Id.IsNull() && data.Id.IsNull()
-	bothSet := !data.Workspace_Id.IsNull() && !data.Id.IsNull()
-
-	if bothNull || bothSet {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("name"),
-			"Invalid attribute configuration",
-			"one of 'name' or 'id' must be set",
-		)
-	}
 }
 
 // Configure is a method that configures the WorkspaceDataSource.
