@@ -1,4 +1,4 @@
-package workspaceRoleAssignmentProvider
+package workspaceroleassignmentprovider
 
 import (
 	"terraform-provider-fabric/internal/fabricapi/fabricClientModels"

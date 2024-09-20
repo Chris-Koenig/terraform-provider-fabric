@@ -1,4 +1,4 @@
-package workspaceProvider
+package workspaceprovider
 
 import (
 	"terraform-provider-fabric/internal/fabricapi/fabricClientModels"

@@ -1,4 +1,4 @@
-package workspaceProvider
+package workspaceprovider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"

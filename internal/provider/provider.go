@@ -6,8 +6,8 @@ package provider
 import (
 	"context"
 	"terraform-provider-fabric/internal/fabricapi"
-	"terraform-provider-fabric/internal/provider/workspaceProvider"
-	"terraform-provider-fabric/internal/provider/workspaceRoleAssignmentProvider"
+	"terraform-provider-fabric/internal/provider/workspaceprovider"
+	"terraform-provider-fabric/internal/provider/workspaceroleassignmentprovider"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -94,15 +94,15 @@ func (p *FabricProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 func (p *FabricProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		workspaceProvider.NewWorkspaceResource,
-		workspaceRoleAssignmentProvider.NewWorkspaceRoleAssignmentResource,
+		workspaceprovider.NewWorkspaceResource,
+		workspaceroleassignmentprovider.NewWorkspaceRoleAssignmentResource,
 	}
 }
 
 func (p *FabricProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		workspaceProvider.NewWorkspaceDataSource,
-		workspaceRoleAssignmentProvider.NewWorkspaceRoleAssignmentDataSource,
+		workspaceprovider.NewWorkspaceDataSource,
+		workspaceroleassignmentprovider.NewWorkspaceRoleAssignmentDataSource,
 	}
 }
 

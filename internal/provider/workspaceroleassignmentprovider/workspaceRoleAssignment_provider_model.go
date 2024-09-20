@@ -1,4 +1,4 @@
-package workspaceRoleAssignmentProvider
+package workspaceroleassignmentprovider
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
