@@ -1,4 +1,4 @@
-package workspaceprovider
+package workspaceProvider
 
 import (
 	"context"
@@ -140,7 +140,7 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 	if !config.Id.IsNull() {
 
-		workspace, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](config.Id.ValueString(), "workspaces", *d.client)
+		workspace, err = fabricapi.GetItem[fabricClientModels.WorkspaceReadModel](config.Id.ValueString(), "workspaces", "", *d.client)
 
 		if err != nil {
 			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", config.Id), err.Error())
