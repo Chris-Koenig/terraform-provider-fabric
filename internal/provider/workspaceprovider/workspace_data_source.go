@@ -114,5 +114,4 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
 }
