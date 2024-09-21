@@ -6,6 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+var itemName = "workspaceroleassignment"
+var apiItemName = "roleassignments"
+
 func ConvertApiModelToTerraformModel(apiModel *fabricClientModels.WorkspaceRoleAssignmentReadModel, targetWorkspaceId string) WorkspaceRoleAssignmentProviderModel {
 	var terraformModel WorkspaceRoleAssignmentProviderModel
 

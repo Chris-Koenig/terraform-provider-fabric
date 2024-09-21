@@ -8,7 +8,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 )
 
-// scopes - Power BI API scopes.
+// scopes - FABRIC API scopes.
 var scopes = []string{"https://analysis.windows.net/powerbi/api/.default"}
 
 // Authenticate - Authenticates the client.

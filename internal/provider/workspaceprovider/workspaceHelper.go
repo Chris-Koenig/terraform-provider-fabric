@@ -6,6 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+var itemName = "workspace"
+var apiItemName = "workspaces"
+
 func ConvertApiModelToTerraformModel(apiModel *fabricClientModels.WorkspaceReadModel) WorkspaceProviderModel {
 	var terraformModel WorkspaceProviderModel
 

@@ -19,36 +19,36 @@ var (
 	_ datasource.DataSourceWithConfigure      = &WorkspaceRoleAssignmentDataSource{} // Ensure that WorkspaceDataSource implements the DataSourceWithConfigure interface.
 )
 
-// NewWorkspaceDataSource is a function that creates a new instance of the WorkspaceDataSource.
+// New is a function that creates a new instance of the Fabric DataSource.
 func NewWorkspaceRoleAssignmentDataSource() datasource.DataSource {
 	return &WorkspaceRoleAssignmentDataSource{}
 }
 
-// WorkspaceDataSource is a struct that represents the Power BI workspace data source.
+// Struct that represents the Fabric DataSource.
 type WorkspaceRoleAssignmentDataSource struct {
 	client *fabricapi.FabricClient
 }
 
-// Metadata is a method that sets the metadata for the WorkspaceDataSource.
+// Metadata is a method that sets the metadata for the DataSource.
 func (d *WorkspaceRoleAssignmentDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_workspaceroleassignment"
+	resp.TypeName = req.ProviderTypeName + "_" + itemName
 }
 
-// Schema is a method that sets the schema for the WorkspaceDataSource.
+// Schema is a method that sets the schema for the DataSource.
 func (d *WorkspaceRoleAssignmentDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Fabric workspace data source",
+		MarkdownDescription: "Fabric " + itemName + " data source",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "ID (GUID) of the workspace role assignment. This value is read-only.",
+				MarkdownDescription: "ID (GUID) of the " + itemName,
 				Computed:            false,
 				Required:            true,
 			},
 			"workspace_id": schema.StringAttribute{
-				MarkdownDescription: "ID (GUID) of the workspace. This is required.",
+				MarkdownDescription: "Workspace ID (GUID) of the workspace.",
 				Computed:            false,
 				Required:            true,
 			},
@@ -62,35 +62,19 @@ func (d *WorkspaceRoleAssignmentDataSource) Schema(_ context.Context, req dataso
 				Description: "The principal assigned to the role.",
 			},
 			"role": schema.StringAttribute{
-				MarkdownDescription: "Role assigned to the principal ('Member', 'Admin', 'Contributor', 'Viewer'). This is required.",
+				MarkdownDescription: "Role assigned to the principal ('Member', 'Admin', 'Contributor', 'Viewer').",
 				Computed:            true,
 			},
 		},
 	}
 }
 
-// ValidateConfig validates the configuration for the WorkspaceDataSource.
-// It checks if either the 'name' or 'id' attribute is set, and adds an error to the response diagnostics if both are empty or both are non-empty.
-// If there are any errors in the response diagnostics, the function returns without further processing.
-// Parameters:
-//   - ctx: The context.Context object for the request.
-//   - req: The ValidateConfigRequest object containing the configuration to validate.
-//   - resp: The ValidateConfigResponse object to store the validation results.
-//
-// Returns: None.
+// ValidateConfig validates the configuration for the DataSource.
 func (d *WorkspaceRoleAssignmentDataSource) ValidateConfig(ctx context.Context, req datasource.ValidateConfigRequest, resp *datasource.ValidateConfigResponse) {
 
 }
 
-// Configure is a method that configures the WorkspaceDataSource.
-// It creates a new instance of the powerbiapi.Client with the specified base URL.
-// If an error occurs while creating the client, an error is added to the response diagnostics.
-// Parameters:
-//   - ctx: The context.Context object for the request.
-//   - req: The ConfigureRequest object containing the configuration to configure.
-//   - resp: The ConfigureResponse object to store the configuration results.
-//
-// Returns: None.
+// Configure is a method that configures the DataSource.
 func (d *WorkspaceRoleAssignmentDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
@@ -111,15 +95,7 @@ func (d *WorkspaceRoleAssignmentDataSource) Configure(ctx context.Context, req d
 	d.client = client
 }
 
-// Read is a method that reads the data from the Power BI service and returns the result.
-// It takes a ReadRequest and a ReadResponse as input and output parameters, respectively.
-// It reads the data from the Power BI service and returns the result in the response.
-// Parameters:
-//   - ctx: The context.Context object for the request.
-//   - req: The ReadRequest object containing the configuration to read.
-//   - resp: The ReadResponse object to store the read results.
-//
-// Returns: None.
+// Read is a method that reads the data from the Fabric service and returns the result.
 func (d *WorkspaceRoleAssignmentDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data, state WorkspaceRoleAssignmentProviderModel
 	var roleAssignment *fabricClientModels.WorkspaceRoleAssignmentReadModel
@@ -132,16 +108,16 @@ func (d *WorkspaceRoleAssignmentDataSource) Read(ctx context.Context, req dataso
 
 	if !data.Id.IsNull() {
 
-		roleAssignment, err = fabricapi.GetItem[fabricClientModels.WorkspaceRoleAssignmentReadModel](data.Id.ValueString(), "roleassignments", data.Workspace_Id.ValueString(), *d.client)
+		roleAssignment, err = fabricapi.GetItem[fabricClientModels.WorkspaceRoleAssignmentReadModel](data.Id.ValueString(), apiItemName, data.Workspace_Id.ValueString(), *d.client)
 
 		if err != nil {
-			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve workspace with Id %s", data.Id), err.Error())
+			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve "+itemName+" with Id %s", data.Id), err.Error())
 			return
 		}
 	}
 
 	if roleAssignment == nil {
-		resp.Diagnostics.AddError("No RoleAssignment found", "No workspace found with the specified name or id.")
+		resp.Diagnostics.AddError("No "+itemName+" found", "No "+itemName+" found with the specified id.")
 		return
 	}
 

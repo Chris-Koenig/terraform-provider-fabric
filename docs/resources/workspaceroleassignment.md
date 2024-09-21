@@ -3,12 +3,12 @@
 page_title: "fabric_workspaceroleassignment Resource - fabric"
 subcategory: ""
 description: |-
-  Schema for Workspace Role Assignment
+  Fabric workspaceroleassignment data source
 ---
 
 # fabric_workspaceroleassignment (Resource)
 
-Schema for Workspace Role Assignment
+Fabric workspaceroleassignment data source
 
 ## Example Usage
 
@@ -29,13 +29,13 @@ resource "workspace_role_assignment" "example" {
 
 ### Required
 
-- `principal` (Attributes) Details of the principal (user or group) associated with the workspace role assignment. (see [below for nested schema](#nestedatt--principal))
+- `principal` (Attributes) Details of the principal (user or group) associated with the workspaceroleassignment. (see [below for nested schema](#nestedatt--principal))
 - `role` (String) Role assigned to the principal ('Member', 'Admin', 'Contributor', 'Viewer'). This is required.
-- `workspace_id` (String) ID (GUID) of the workspace. This is required.
+- `workspace_id` (String) ID (GUID) of the workspaceroleassignment. This is required.
 
 ### Read-Only
 
-- `id` (String) ID (GUID) of the workspace role assignment. This value is read-only.
+- `id` (String) ID (GUID) of the workspaceroleassignment. This value is read-only.
 
 <a id="nestedatt--principal"></a>
 ### Nested Schema for `principal`

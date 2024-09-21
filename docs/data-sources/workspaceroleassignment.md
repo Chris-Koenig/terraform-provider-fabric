@@ -3,12 +3,12 @@
 page_title: "fabric_workspaceroleassignment Data Source - fabric"
 subcategory: ""
 description: |-
-  Fabric workspace data source
+  Fabric workspaceroleassignment data source
 ---
 
 # fabric_workspaceroleassignment (Data Source)
 
-Fabric workspace data source
+Fabric workspaceroleassignment data source
 
 ## Example Usage
 
@@ -24,8 +24,8 @@ data "fabric_workspaceroleassignment" "data_axample" {
 
 ### Required
 
-- `id` (String) ID (GUID) of the workspace role assignment. This value is read-only.
-- `workspace_id` (String) ID (GUID) of the workspace. This is required.
+- `id` (String) ID (GUID) of the workspaceroleassignment
+- `workspace_id` (String) Workspace ID (GUID) of the workspace.
 
 ### Optional
 
@@ -33,7 +33,7 @@ data "fabric_workspaceroleassignment" "data_axample" {
 
 ### Read-Only
 
-- `role` (String) Role assigned to the principal ('Member', 'Admin', 'Contributor', 'Viewer'). This is required.
+- `role` (String) Role assigned to the principal ('Member', 'Admin', 'Contributor', 'Viewer').
 
 <a id="nestedatt--principal"></a>
 ### Nested Schema for `principal`
