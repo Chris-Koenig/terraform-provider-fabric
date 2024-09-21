@@ -53,12 +53,12 @@ func (r *WorkspaceRoleAssignmentResource) ImportState(_ context.Context, req res
 	panic("unimplemented")
 }
 
-// Metadata sets the metadata for the WorkspaceResource.
+// Metadata sets the metadata for the resource.
 func (r *WorkspaceRoleAssignmentResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + itemName
 }
 
-// Schema sets the schema for the Resource.
+// Schema sets the schema for the resource.
 func (r *WorkspaceRoleAssignmentResource) Schema(_ context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Fabric " + itemName + " data source",
@@ -130,7 +130,7 @@ func (r *WorkspaceRoleAssignmentResource) Read(ctx context.Context, req resource
 	}
 }
 
-// Create a new Fabric item.
+// Create creates a new Fabric item.
 func (r *WorkspaceRoleAssignmentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan, state WorkspaceRoleAssignmentProviderModel
 	var workspaceRoleAssignmentCreated *fabricClientModels.WorkspaceRoleAssignmentReadModel
@@ -160,7 +160,7 @@ func (r *WorkspaceRoleAssignmentResource) Create(ctx context.Context, req resour
 	}
 }
 
-// Updates the Fabric item
+// Update updates the Fabric item.
 func (r *WorkspaceRoleAssignmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
 	var plan, state WorkspaceRoleAssignmentProviderModel
@@ -201,7 +201,7 @@ func (r *WorkspaceRoleAssignmentResource) Update(ctx context.Context, req resour
 	}
 }
 
-// deletes the Fabric item.
+// Delete deletes the Fabric item.
 func (r *WorkspaceRoleAssignmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state WorkspaceRoleAssignmentProviderModel
 	var err error

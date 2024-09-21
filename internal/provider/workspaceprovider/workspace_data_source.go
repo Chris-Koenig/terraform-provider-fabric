@@ -22,7 +22,7 @@ func NewWorkspaceDataSource() datasource.DataSource {
 	return &WorkspaceDataSource{}
 }
 
-// // Struct that represents the Fabric data source
+// // Struct that represents the Fabric data source.
 type WorkspaceDataSource struct {
 	client *fabricapi.FabricClient
 }

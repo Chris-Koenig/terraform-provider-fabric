@@ -53,7 +53,7 @@ func (r *WorkspaceResource) ImportState(_ context.Context, req resource.ImportSt
 	panic("unimplemented")
 }
 
-// Metadata sets the metadata for the WorkspaceResource.
+// Metadata sets the metadata for the resource.
 func (r *WorkspaceResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + itemName
 }
@@ -121,7 +121,7 @@ func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 }
 
-// Create a new Fabric item
+// Create creates a new Fabric item.
 func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan, state WorkspaceProviderModel
 	var workspaceCreated *fabricClientModels.WorkspaceReadModel
@@ -155,7 +155,7 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 	}
 }
 
-// Update Updates the Fabric item
+// Update updates the Fabric item.
 func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
 	var plan, state WorkspaceProviderModel
@@ -198,7 +198,7 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 }
 
-// deletes the Fabric item
+// Delete deletes the Fabric item.
 func (r *WorkspaceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state WorkspaceProviderModel
 	var err error
