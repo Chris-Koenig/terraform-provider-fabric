@@ -14,7 +14,6 @@ func GetItem[TItemResponseModel any](itemId string, apiObjectName string, worksp
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare the request for GetGroups: %v", err)
 	}
-
 	if workspaceId == "" {
 		url = fmt.Sprintf("/v1/%s/%s", apiObjectName, itemId)
 	} else if workspaceId != "" {

@@ -21,12 +21,18 @@ func ConvertApiModelToTerraformModel(apiModel *fabricClientModels.WorkspaceReadM
 		terraformModel.Description = types.StringValue(apiModel.Description)
 	}
 
+	if apiModel.FabricCapacityId == nil || *apiModel.FabricCapacityId == "" {
+
+		terraformModel.FabricCapacityId = types.StringValue("")
+	} else {
+		terraformModel.FabricCapacityId = types.StringValue(*apiModel.FabricCapacityId)
+	}
+
 	return terraformModel
 }
 
 func ConvertTerraformModelToApiCreateModel(terraformModel WorkspaceProviderModel) fabricClientModels.WorkspaceCreateRequestModel {
 	var apiCreateModel fabricClientModels.WorkspaceCreateRequestModel
-
 	apiCreateModel.DisplayName = terraformModel.Name.ValueString()
 
 	if terraformModel.Description == types.StringValue("") {
@@ -36,7 +42,6 @@ func ConvertTerraformModelToApiCreateModel(terraformModel WorkspaceProviderModel
 	} else {
 		apiCreateModel.Description = terraformModel.Description.ValueString()
 	}
-
 	return apiCreateModel
 }
 

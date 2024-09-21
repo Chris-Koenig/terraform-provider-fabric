@@ -80,9 +80,13 @@ func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest
 				Required:            true,
 				Computed:            false,
 			},
-
 			"description": schema.StringAttribute{
 				MarkdownDescription: "description of the " + itemName + ". Max size is 2000 characters",
+				Optional:            false,
+				Required:            true,
+			},
+			"fabric_capacity_id": schema.StringAttribute{
+				MarkdownDescription: "ID (GUID) of the Fabric Capacity of the " + itemName + ".",
 				Optional:            false,
 				Required:            true,
 			},
@@ -137,7 +141,7 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 
 	var workspaceToCreate = ConvertTerraformModelToApiCreateModel(plan)
 
-	workspaceCreated, err = fabricapi.CreateItem[fabricClientModels.WorkspaceCreateRequestModel, fabricClientModels.WorkspaceReadModel](workspaceToCreate, "workspaces", "", *r.client)
+	workspaceCreated, err = fabricapi.CreateWorkspace(workspaceToCreate, plan.FabricCapacityId.ValueStringPointer(), *r.client)
 
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot create "+itemName+" with name %s", plan.Name.ValueString()), err.Error())
