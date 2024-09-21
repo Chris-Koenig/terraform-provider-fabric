@@ -14,8 +14,9 @@ Fabric workspace data source
 
 ```terraform
 resource "fabric_workspace" "myWorkspace" {
-  name        = "Name of the Workspace"
-  description = "Description Text of the Workspace."
+  name               = "Name of the Workspace"
+  description        = "Description Text of the Workspace."
+  fabric_capacity_id = "00000000-0000-0000-0000-000000000000"
 }
 ```
 
@@ -25,6 +26,7 @@ resource "fabric_workspace" "myWorkspace" {
 ### Required
 
 - `description` (String) description of the workspace. Max size is 2000 characters
+- `fabric_capacity_id` (String) ID (GUID) of the Fabric Capacity of the workspace.
 - `name` (String) name of the workspace. Max Size is 200 characters.
 
 ### Read-Only

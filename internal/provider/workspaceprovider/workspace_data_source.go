@@ -52,6 +52,11 @@ func (d *WorkspaceDataSource) Schema(_ context.Context, req datasource.SchemaReq
 				MarkdownDescription: "description of the " + itemName,
 				Computed:            true,
 			},
+			"fabric_capacity_id": schema.StringAttribute{
+				MarkdownDescription: "ID (GUID) of the Fabric Capacity of the " + itemName + ".",
+				Optional:            false,
+				Required:            true,
+			},
 		},
 	}
 }
