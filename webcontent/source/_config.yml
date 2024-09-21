@@ -1,1 +1,20 @@
-theme: jekyll-theme-minimal
+# _config.yml
+
+# The theme to use. You can choose a theme from GitHub's supported themes.
+# Here, we're using 'minima' as an example.
+theme: minima
+
+# Set the base URL for GitHub Pages to know where to look for the files.
+# If your GitHub repository is something like 'username/repo-name', the baseurl
+# would be '/repo-name'
+baseurl: "/repository-name" # Replace 'repository-name' with the actual name of your GitHub repo
+
+# Set the url to your GitHub Pages site (no trailing slash)
+url: "https://username.github.io" # Replace 'username' with your GitHub username
+
+# Include other custom configurations as needed:
+title: "My Project Website"
+description: "A description of my project."
+author: "Your Name"
+
+# Any other options, e.g., markdown settings, plugins, etc.
