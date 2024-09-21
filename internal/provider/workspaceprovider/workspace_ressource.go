@@ -179,7 +179,7 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 
 	tflog.Debug(ctx, fmt.Sprintf("Updating "+itemName+" with name: %s", state.Name.ValueString()))
 
-	err = fabricapi.UpdateItem[fabricClientModels.WorkspaceUpdateRequestModel](state.Id.ValueString(), apiItemName, updateRequest, "", *r.client)
+	err = fabricapi.UpdateWorkspace(updateRequest, state.Id.ValueString(), plan.FabricCapacityId.ValueString(), state.FabricCapacityId.ValueString(), *r.client)
 
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot update "+itemName+" with Id %s", state.Id.ValueString()), err.Error())
