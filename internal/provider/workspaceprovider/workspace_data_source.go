@@ -17,12 +17,12 @@ var (
 	_ datasource.DataSourceWithConfigure      = &WorkspaceDataSource{} // Ensure that WorkspaceDataSource implements the DataSourceWithConfigure interface.
 )
 
-// New is a function that creates a new instance of the Fabric Data Source.
+// New is a function that creates a new instance of the Fabric DataSource.
 func NewWorkspaceDataSource() datasource.DataSource {
 	return &WorkspaceDataSource{}
 }
 
-// // Struct that represents the Fabric data source.
+// Struct that represents the Fabric DataSource.
 type WorkspaceDataSource struct {
 	client *fabricapi.FabricClient
 }
