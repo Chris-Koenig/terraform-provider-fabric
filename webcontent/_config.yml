@@ -18,7 +18,6 @@ plugins:
 # Include other custom configurations as needed:
 title: "My Project Website"
 description: "A description of my project."
-# author: "Your Name"
 
 # Any other options, e.g., markdown settings, plugins, etc.
 
