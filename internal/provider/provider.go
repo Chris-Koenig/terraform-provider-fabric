@@ -7,7 +7,7 @@ import (
 	"context"
 	"terraform-provider-fabric/internal/fabricapi"
 	"terraform-provider-fabric/internal/provider/roleAssignmentProvider"
-	"terraform-provider-fabric/internal/provider/workspaceProvider"
+	workspaceProvider "terraform-provider-fabric/internal/provider/workspaceprovider"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
