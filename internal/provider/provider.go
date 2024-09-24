@@ -6,8 +6,8 @@ package provider
 import (
 	"context"
 	"terraform-provider-fabric/internal/fabricapi"
+	workspaceProvider "terraform-provider-fabric/internal/provider/aworkspaceProvider"
 	"terraform-provider-fabric/internal/provider/roleAssignmentProvider"
-	workspaceProvider "terraform-provider-fabric/internal/provider/workspaceprovider"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
