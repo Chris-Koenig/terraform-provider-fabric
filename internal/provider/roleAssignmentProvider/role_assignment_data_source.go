@@ -1,4 +1,4 @@
-package workspaceroleassignmentprovider
+package roleAssignmentProvider
 
 import (
 	"context"
@@ -14,28 +14,28 @@ import (
 )
 
 var (
-	_ datasource.DataSource                   = &WorkspaceRoleAssignmentDataSource{} // Ensure that WorkspaceDataSource implements the DataSource interface.
-	_ datasource.DataSourceWithValidateConfig = &WorkspaceRoleAssignmentDataSource{} // Ensure that WorkspaceDataSource implements the DataSourceWithValidateConfig interface.
-	_ datasource.DataSourceWithConfigure      = &WorkspaceRoleAssignmentDataSource{} // Ensure that WorkspaceDataSource implements the DataSourceWithConfigure interface.
+	_ datasource.DataSource                   = &RoleAssignmentDataSource{} // Ensure that WorkspaceDataSource implements the DataSource interface.
+	_ datasource.DataSourceWithValidateConfig = &RoleAssignmentDataSource{} // Ensure that WorkspaceDataSource implements the DataSourceWithValidateConfig interface.
+	_ datasource.DataSourceWithConfigure      = &RoleAssignmentDataSource{} // Ensure that WorkspaceDataSource implements the DataSourceWithConfigure interface.
 )
 
 // New is a function that creates a new instance of the Fabric DataSource.
-func NewWorkspaceRoleAssignmentDataSource() datasource.DataSource {
-	return &WorkspaceRoleAssignmentDataSource{}
+func NewRoleAssignmentDataSource() datasource.DataSource {
+	return &RoleAssignmentDataSource{}
 }
 
 // Struct that represents the Fabric DataSource.
-type WorkspaceRoleAssignmentDataSource struct {
+type RoleAssignmentDataSource struct {
 	client *fabricapi.FabricClient
 }
 
 // Metadata is a method that sets the metadata for the DataSource.
-func (d *WorkspaceRoleAssignmentDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *RoleAssignmentDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + itemName
 }
 
 // Schema is a method that sets the schema for the DataSource.
-func (d *WorkspaceRoleAssignmentDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *RoleAssignmentDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 
 		// This description is used by the documentation generator and the language server.
@@ -70,12 +70,12 @@ func (d *WorkspaceRoleAssignmentDataSource) Schema(_ context.Context, req dataso
 }
 
 // ValidateConfig validates the configuration for the DataSource.
-func (d *WorkspaceRoleAssignmentDataSource) ValidateConfig(ctx context.Context, req datasource.ValidateConfigRequest, resp *datasource.ValidateConfigResponse) {
+func (d *RoleAssignmentDataSource) ValidateConfig(ctx context.Context, req datasource.ValidateConfigRequest, resp *datasource.ValidateConfigResponse) {
 
 }
 
 // Configure is a method that configures the DataSource.
-func (d *WorkspaceRoleAssignmentDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *RoleAssignmentDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -96,7 +96,7 @@ func (d *WorkspaceRoleAssignmentDataSource) Configure(ctx context.Context, req d
 }
 
 // Read is a method that reads the data from the Fabric service and returns the result.
-func (d *WorkspaceRoleAssignmentDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *RoleAssignmentDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data, state WorkspaceRoleAssignmentProviderModel
 	var roleAssignment *fabricClientModels.WorkspaceRoleAssignmentReadModel
 	var err error
