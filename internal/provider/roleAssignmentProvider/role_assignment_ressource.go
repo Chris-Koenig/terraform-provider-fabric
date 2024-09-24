@@ -13,22 +13,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ resource.Resource = &WorkspaceRoleAssignmentResource{}                // Ensure that WorkspaceResource implements the Resource interface.
-var _ resource.ResourceWithImportState = &WorkspaceRoleAssignmentResource{} // Ensure that WorkspaceResource implements the ResourceWithImportState interface.
-var _ resource.ResourceWithConfigure = &WorkspaceRoleAssignmentResource{}   // Ensure that WorkspaceResource implements the ResourceWithConfigure interface.
+var _ resource.Resource = &RoleAssignmentResource{}                // Ensure that WorkspaceResource implements the Resource interface.
+var _ resource.ResourceWithImportState = &RoleAssignmentResource{} // Ensure that WorkspaceResource implements the ResourceWithImportState interface.
+var _ resource.ResourceWithConfigure = &RoleAssignmentResource{}   // Ensure that WorkspaceResource implements the ResourceWithConfigure interface.
 
 // New is a function that creates a new instance of the Resource.
-func NewWorkspaceRoleAssignmentResource() resource.Resource {
-	return &WorkspaceRoleAssignmentResource{}
+func NewRoleAssignmentResource() resource.Resource {
+	return &RoleAssignmentResource{}
 }
 
 // Struct that represents the Fabric workspace resource.
-type WorkspaceRoleAssignmentResource struct {
+type RoleAssignmentResource struct {
 	client *fabricapi.FabricClient
 }
 
 // Configure configures the WorkspaceResource.
-func (r *WorkspaceRoleAssignmentResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *RoleAssignmentResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -49,17 +49,17 @@ func (r *WorkspaceRoleAssignmentResource) Configure(_ context.Context, req resou
 }
 
 // ImportState implements resource.ResourceWithImportState.
-func (r *WorkspaceRoleAssignmentResource) ImportState(_ context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *RoleAssignmentResource) ImportState(_ context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	panic("unimplemented")
 }
 
 // Metadata sets the metadata for the resource.
-func (r *WorkspaceRoleAssignmentResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *RoleAssignmentResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_" + itemName
 }
 
 // Schema sets the schema for the resource.
-func (r *WorkspaceRoleAssignmentResource) Schema(_ context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *RoleAssignmentResource) Schema(_ context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Fabric " + itemName + " data source",
 
@@ -100,7 +100,7 @@ func (r *WorkspaceRoleAssignmentResource) Schema(_ context.Context, req resource
 }
 
 // Read updates the state with the data from the Fabric service.
-func (r *WorkspaceRoleAssignmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *RoleAssignmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state, newState WorkspaceRoleAssignmentProviderModel
 	var workspaceRoleAssignmentCreated *fabricClientModels.WorkspaceRoleAssignmentReadModel
 	var err error
@@ -131,7 +131,7 @@ func (r *WorkspaceRoleAssignmentResource) Read(ctx context.Context, req resource
 }
 
 // Create creates a new Fabric item.
-func (r *WorkspaceRoleAssignmentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *RoleAssignmentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan, state WorkspaceRoleAssignmentProviderModel
 	var workspaceRoleAssignmentCreated *fabricClientModels.WorkspaceRoleAssignmentReadModel
 	var err error
@@ -161,7 +161,7 @@ func (r *WorkspaceRoleAssignmentResource) Create(ctx context.Context, req resour
 }
 
 // Update updates the Fabric item.
-func (r *WorkspaceRoleAssignmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *RoleAssignmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
 	var plan, state WorkspaceRoleAssignmentProviderModel
 	var workspaceRoleAssignmentUpdated *fabricClientModels.WorkspaceRoleAssignmentReadModel
@@ -202,7 +202,7 @@ func (r *WorkspaceRoleAssignmentResource) Update(ctx context.Context, req resour
 }
 
 // Delete deletes the Fabric item.
-func (r *WorkspaceRoleAssignmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *RoleAssignmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state WorkspaceRoleAssignmentProviderModel
 	var err error
 
