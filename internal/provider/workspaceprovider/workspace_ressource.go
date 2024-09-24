@@ -1,4 +1,4 @@
-package workspaceprovider
+package workspaceProvider
 
 import (
 	"context"
