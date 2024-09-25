@@ -16,45 +16,30 @@ func ConvertApiModelToTerraformModel(apiModel *fabricClientModels.WorkspaceReadM
 	terraformModel.Name = types.StringValue(apiModel.DisplayName)
 
 	if apiModel.Description == "" {
-		terraformModel.Description = types.StringValue("") //types.StringNull()
+		terraformModel.Description = types.StringNull()
 	} else {
 		terraformModel.Description = types.StringValue(apiModel.Description)
 	}
 
-	if apiModel.FabricCapacityId == nil || *apiModel.FabricCapacityId == "" {
+	if apiModel.FabricCapacityId == "" {
 
-		terraformModel.FabricCapacityId = types.StringValue("")
+		terraformModel.FabricCapacityId = types.StringNull()
 	} else {
-		terraformModel.FabricCapacityId = types.StringValue(*apiModel.FabricCapacityId)
+		terraformModel.FabricCapacityId = types.StringValue(apiModel.FabricCapacityId)
 	}
-
 	return terraformModel
 }
 
 func ConvertTerraformModelToApiCreateModel(terraformModel WorkspaceProviderModel) fabricClientModels.WorkspaceCreateRequestModel {
 	var apiCreateModel fabricClientModels.WorkspaceCreateRequestModel
 	apiCreateModel.DisplayName = terraformModel.Name.ValueString()
-
-	if terraformModel.Description == types.StringValue("") {
-		apiCreateModel.Description = "" //types.StringNull() // Set to null
-	} else if terraformModel.Description == types.StringNull() {
-		apiCreateModel.Description = ""
-	} else {
-		apiCreateModel.Description = terraformModel.Description.ValueString()
-	}
+	apiCreateModel.Description = terraformModel.Description.ValueString()
 	return apiCreateModel
 }
 
 func ConvertTerraformModelToApiUpdateModel(terraformModel WorkspaceProviderModel) fabricClientModels.WorkspaceUpdateRequestModel {
 	var apiCreateModel fabricClientModels.WorkspaceUpdateRequestModel
-
 	apiCreateModel.DisplayName = terraformModel.Name.ValueString()
-
-	if terraformModel.Description == types.StringValue("") {
-		apiCreateModel.Description = "" //types.StringNull() // Set to null
-	} else {
-		apiCreateModel.Description = terraformModel.Description.ValueString()
-	}
-
+	apiCreateModel.Description = terraformModel.Description.ValueString()
 	return apiCreateModel
 }

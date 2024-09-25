@@ -101,8 +101,8 @@ func (r *RoleAssignmentResource) Schema(_ context.Context, req resource.SchemaRe
 
 // Read updates the state with the data from the Fabric service.
 func (r *RoleAssignmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state, newState WorkspaceRoleAssignmentProviderModel
-	var workspaceRoleAssignmentCreated *fabricClientModels.WorkspaceRoleAssignmentReadModel
+	var state, newState RoleAssignmentProviderModel
+	var workspaceRoleAssignmentCreated *fabricClientModels.RoleAssignmentReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -113,7 +113,7 @@ func (r *RoleAssignmentResource) Read(ctx context.Context, req resource.ReadRequ
 
 	tflog.Debug(ctx, fmt.Sprintf("Reading "+itemName+" with ID: %s", state.Id.ValueString()))
 
-	workspaceRoleAssignmentCreated, err = fabricapi.GetItem[fabricClientModels.WorkspaceRoleAssignmentReadModel](state.Id.ValueString(), apiItemName, state.Workspace_Id.ValueString(), *r.client)
+	workspaceRoleAssignmentCreated, err = fabricapi.GetItem[fabricClientModels.RoleAssignmentReadModel](state.Id.ValueString(), apiItemName, state.Workspace_Id.ValueString(), *r.client)
 
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve "+itemName+" with Id %s", state.Id.ValueString()), err.Error())
@@ -132,8 +132,8 @@ func (r *RoleAssignmentResource) Read(ctx context.Context, req resource.ReadRequ
 
 // Create creates a new Fabric item.
 func (r *RoleAssignmentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan, state WorkspaceRoleAssignmentProviderModel
-	var workspaceRoleAssignmentCreated *fabricClientModels.WorkspaceRoleAssignmentReadModel
+	var plan, state RoleAssignmentProviderModel
+	var workspaceRoleAssignmentCreated *fabricClientModels.RoleAssignmentReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -146,7 +146,7 @@ func (r *RoleAssignmentResource) Create(ctx context.Context, req resource.Create
 
 	var workspaceReleAssignmentToCreate = ConvertTerraformModelToApiCreateModel(plan)
 
-	workspaceRoleAssignmentCreated, err = fabricapi.CreateItem[fabricClientModels.WorkspaceRoleAssignmentCreateRequestModel, fabricClientModels.WorkspaceRoleAssignmentReadModel](workspaceReleAssignmentToCreate, "roleAssignments", plan.Workspace_Id.ValueString(), *r.client)
+	workspaceRoleAssignmentCreated, err = fabricapi.CreateItem[fabricClientModels.RoleAssignmentCreateRequestModel, fabricClientModels.RoleAssignmentReadModel](workspaceReleAssignmentToCreate, "roleAssignments", plan.Workspace_Id.ValueString(), *r.client)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot create "+itemName+" with id %s", plan.Id.ValueString()), err.Error())
 		return
@@ -163,9 +163,9 @@ func (r *RoleAssignmentResource) Create(ctx context.Context, req resource.Create
 // Update updates the Fabric item.
 func (r *RoleAssignmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 
-	var plan, state WorkspaceRoleAssignmentProviderModel
-	var workspaceRoleAssignmentUpdated *fabricClientModels.WorkspaceRoleAssignmentReadModel
-	var updateRequest fabricClientModels.WorkspaceRoleAssignmentUpdateRequestModel
+	var plan, state RoleAssignmentProviderModel
+	var workspaceRoleAssignmentUpdated *fabricClientModels.RoleAssignmentReadModel
+	var updateRequest fabricClientModels.RoleAssignmentUpdateRequestModel
 	var err error
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -179,14 +179,14 @@ func (r *RoleAssignmentResource) Update(ctx context.Context, req resource.Update
 
 	tflog.Debug(ctx, fmt.Sprintf("Updating "+itemName+" with name: %s", state.Id.ValueString()))
 
-	err = fabricapi.UpdateItem[fabricClientModels.WorkspaceRoleAssignmentUpdateRequestModel](state.Id.ValueString(), apiItemName, updateRequest, plan.Workspace_Id.ValueString(), *r.client)
+	err = fabricapi.UpdateItem[fabricClientModels.RoleAssignmentUpdateRequestModel](state.Id.ValueString(), apiItemName, updateRequest, plan.Workspace_Id.ValueString(), *r.client)
 
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot update "+itemName+" with Id %s", state.Id.ValueString()), err.Error())
 		return
 	}
 
-	workspaceRoleAssignmentUpdated, err = fabricapi.GetItem[fabricClientModels.WorkspaceRoleAssignmentReadModel](state.Id.ValueString(), apiItemName, state.Workspace_Id.ValueString(), *r.client)
+	workspaceRoleAssignmentUpdated, err = fabricapi.GetItem[fabricClientModels.RoleAssignmentReadModel](state.Id.ValueString(), apiItemName, state.Workspace_Id.ValueString(), *r.client)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve "+itemName+" with Id %s", state.Id.ValueString()), err.Error())
 		return
@@ -203,7 +203,7 @@ func (r *RoleAssignmentResource) Update(ctx context.Context, req resource.Update
 
 // Delete deletes the Fabric item.
 func (r *RoleAssignmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state WorkspaceRoleAssignmentProviderModel
+	var state RoleAssignmentProviderModel
 	var err error
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)

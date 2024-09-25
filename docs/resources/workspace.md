@@ -25,9 +25,12 @@ resource "fabric_workspace" "myWorkspace" {
 
 ### Required
 
+- `name` (String) name of the workspace. Max Size is 200 characters.
+
+### Optional
+
 - `description` (String) description of the workspace. Max size is 2000 characters
 - `fabric_capacity_id` (String) ID (GUID) of the Fabric Capacity of the workspace.
-- `name` (String) name of the workspace. Max Size is 200 characters.
 
 ### Read-Only
 

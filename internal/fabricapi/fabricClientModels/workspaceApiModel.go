@@ -14,10 +14,10 @@ type WorkspaceCreateRequestModel struct {
 }
 
 type WorkspaceReadModel struct {
-	Id               string  `json:"id"`
-	DisplayName      string  `json:"displayName"`
-	Description      string  `json:"description"`
-	FabricCapacityId *string `json:"capacityId"`
+	Id               string `json:"id"`
+	DisplayName      string `json:"displayName"`
+	Description      string `json:"description"`
+	FabricCapacityId string `json:"capacityId"`
 }
 
 type WorkspaceUpdateRequestModel struct {

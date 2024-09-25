@@ -29,6 +29,7 @@ type WorkspaceResource struct {
 
 // Configure configures the WorkspaceResource.
 func (r *WorkspaceResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -82,13 +83,13 @@ func (r *WorkspaceResource) Schema(_ context.Context, req resource.SchemaRequest
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "description of the " + itemName + ". Max size is 2000 characters",
-				Optional:            false,
-				Required:            true,
+				Optional:            true,
+				Required:            false,
 			},
 			"fabric_capacity_id": schema.StringAttribute{
 				MarkdownDescription: "ID (GUID) of the Fabric Capacity of the " + itemName + ".",
-				Optional:            false,
-				Required:            true,
+				Optional:            true,
+				Required:            false,
 			},
 		},
 	}
@@ -141,7 +142,7 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 
 	var workspaceToCreate = ConvertTerraformModelToApiCreateModel(plan)
 
-	workspaceCreated, err = fabricapi.CreateWorkspace(workspaceToCreate, plan.FabricCapacityId.ValueStringPointer(), *r.client)
+	workspaceCreated, err = fabricapi.CreateWorkspace(workspaceToCreate, plan.FabricCapacityId.ValueString(), *r.client)
 
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("Cannot create "+itemName+" with name %s", plan.Name.ValueString()), err.Error())
