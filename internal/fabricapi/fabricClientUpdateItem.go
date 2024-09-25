@@ -90,7 +90,7 @@ func UpdateWorkspace(workspaceUpdateRequestModel fabricClientModels.WorkspaceUpd
 		urlAssignCapacity := "/v1/workspaces/" + workspaceId + "/assignToCapacity"
 
 		capacityAssignModel := new(fabricClientModels.AssignCapacityRequestModel)
-		capacityAssignModel.FabricCapacityId = &capacityPlanValue
+		capacityAssignModel.FabricCapacityId = capacityPlanValue
 
 		resp, err := client.
 			SetBody(capacityAssignModel).

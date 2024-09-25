@@ -35,7 +35,7 @@ func CreateItem[TCreate any, TRead any](itemToCreate TCreate, apiObjectName stri
 
 // The creation of the Workspace is special (Capacity handling), for this reason
 // we handle the creation in a sepperate fuction.
-func CreateWorkspace(workspaceToCreate fabricClientModels.WorkspaceCreateRequestModel, fabricCapacityId *string, c FabricClient) (*fabricClientModels.WorkspaceReadModel, error) {
+func CreateWorkspace(workspaceToCreate fabricClientModels.WorkspaceCreateRequestModel, fabricCapacityId string, c FabricClient) (*fabricClientModels.WorkspaceReadModel, error) {
 
 	var err error
 	var url string
@@ -60,10 +60,10 @@ func CreateWorkspace(workspaceToCreate fabricClientModels.WorkspaceCreateRequest
 		return nil, fmt.Errorf("failed to create item: %v %s", resp, url)
 	}
 
-	if fabricCapacityId == nil || *fabricCapacityId == "" {
-		workspaceCreated.FabricCapacityId = new(string)
+	if fabricCapacityId == "" {
+		workspaceCreated.FabricCapacityId = ""
 
-	} else if fabricCapacityId != nil && *fabricCapacityId != "" {
+	} else if fabricCapacityId != "" {
 
 		// Assign the created Workspace to a capacity
 		urlAssignCreatedWorkspaceToCapacity := "/v1/workspaces/" + workspaceCreated.Id + "/assignToCapacity"
