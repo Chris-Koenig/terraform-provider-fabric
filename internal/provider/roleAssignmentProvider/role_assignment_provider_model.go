@@ -9,9 +9,9 @@ type Principal struct {
 	Type types.String `tfsdk:"type"`
 }
 
-type WorkspaceRoleAssignmentProviderModel struct {
+type RoleAssignmentProviderModel struct {
 	Id           types.String `tfsdk:"id"`
 	Workspace_Id types.String `tfsdk:"workspace_id"`
-	Principal    *Principal   `tfsdk:"principal"`
+	Principal    Principal    `tfsdk:"principal"`
 	Role         types.String `tfsdk:"role"`
 }

@@ -97,8 +97,8 @@ func (d *RoleAssignmentDataSource) Configure(ctx context.Context, req datasource
 
 // Read is a method that reads the data from the Fabric service and returns the result.
 func (d *RoleAssignmentDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data, state WorkspaceRoleAssignmentProviderModel
-	var roleAssignment *fabricClientModels.WorkspaceRoleAssignmentReadModel
+	var data, state RoleAssignmentProviderModel
+	var roleAssignment *fabricClientModels.RoleAssignmentReadModel
 	var err error
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -108,7 +108,7 @@ func (d *RoleAssignmentDataSource) Read(ctx context.Context, req datasource.Read
 
 	if !data.Id.IsNull() {
 
-		roleAssignment, err = fabricapi.GetItem[fabricClientModels.WorkspaceRoleAssignmentReadModel](data.Id.ValueString(), apiItemName, data.Workspace_Id.ValueString(), *d.client)
+		roleAssignment, err = fabricapi.GetItem[fabricClientModels.RoleAssignmentReadModel](data.Id.ValueString(), apiItemName, data.Workspace_Id.ValueString(), *d.client)
 
 		if err != nil {
 			resp.Diagnostics.AddError(fmt.Sprintf("Cannot retrieve "+itemName+" with Id %s", data.Id), err.Error())

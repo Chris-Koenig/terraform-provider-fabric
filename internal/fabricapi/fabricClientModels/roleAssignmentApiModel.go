@@ -5,18 +5,18 @@ type Principal struct {
 	Type string `json:"type"`
 }
 
-type WorkspaceRoleAssignmentCreateRequestModel struct {
+type RoleAssignmentCreateRequestModel struct {
 	Principal Principal `json:"principal"`
 	Role      string    `json:"role"`
 }
 
-type WorkspaceRoleAssignmentReadModel struct {
+type RoleAssignmentReadModel struct {
 	Id        string    `json:"id"`
 	Principal Principal `json:"principal"`
 	Role      string    `json:"role"`
 }
 
-type WorkspaceRoleAssignmentUpdateRequestModel struct {
+type RoleAssignmentUpdateRequestModel struct {
 	Principal Principal `json:"principal"`
 	Role      string    `json:"role"`
 }
